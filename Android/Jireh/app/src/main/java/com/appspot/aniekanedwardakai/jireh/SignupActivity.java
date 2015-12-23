@@ -75,6 +75,7 @@ public class SignupActivity extends AppCompatActivity implements LoaderCallbacks
     private EditText mConfirmPasswordView;
     private View mProgressView;
     private View mSignupFormView;
+    private AutoCompleteTextView mPhoneView;
     private User newUser;
     private String myFormat = "MM/dd/yy"; //In which you need put here
     private SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
@@ -96,6 +97,7 @@ public class SignupActivity extends AppCompatActivity implements LoaderCallbacks
         mLastNameView = (AutoCompleteTextView) findViewById(R.id.last_name);
         mFirstNameView = (AutoCompleteTextView) findViewById(R.id.first_name);
         mDOBView = (EditText) findViewById(R.id.dateOfBirth);
+        mPhoneView = (AutoCompleteTextView) findViewById(R.id.phoneNumber);
 
 //        populateAutoComplete();
 
@@ -115,12 +117,12 @@ public class SignupActivity extends AppCompatActivity implements LoaderCallbacks
                 }
 
 
-                newUser = new User(mUsernameView.getText(), mFirstNameView.getText(), mLastNameView.getText(), dob,
-                        , mEmailView.getText().toString());
+                newUser = new User(mUsernameView.getText().toString(), mFirstNameView.getText().toString(), mLastNameView.getText().toString(),
+                        dob,mPhoneView.getText().toString(), mEmailView.getText().toString());
                 //Add user to Database
 
                 //Login as user
-
+                attemptLogin();
             }
         });
 
