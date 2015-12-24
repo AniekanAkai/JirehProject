@@ -3,6 +3,7 @@ package com.appspot.aniekanedwardakai.jireh;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.app.DatePickerDialog;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -26,18 +27,26 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+
+import java.text.ParseException;
+import java.util.Date;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
 /**
  * A login screen that offers login via email/password.
  */
-public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
+public class SignupActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
     /**
      * Id to identity READ_CONTACTS permission request.
@@ -58,41 +67,111 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     // UI references.
     private AutoCompleteTextView mEmailView;
+    private AutoCompleteTextView mUsernameView;
+    private AutoCompleteTextView mLastNameView;
+    private AutoCompleteTextView mFirstNameView;
+    private EditText mDOBView;
     private EditText mPasswordView;
+    private EditText mConfirmPasswordView;
     private View mProgressView;
-    private View mLoginFormView;
+    private View mSignupFormView;
+    private AutoCompleteTextView mPhoneView;
+    private User newUser;
+    private String myFormat = "MM/dd/yy"; //In which you need put here
+    private SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
+
+    private Calendar dobValue;
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
-        // Set up the login form.
+        setContentView(R.layout.activity_signup2);
+        // Set up the signup form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
-        populateAutoComplete();
+        mUsernameView = (AutoCompleteTextView) findViewById(R.id.username);
+        mLastNameView = (AutoCompleteTextView) findViewById(R.id.last_name);
+        mFirstNameView = (AutoCompleteTextView) findViewById(R.id.first_name);
+        mDOBView = (EditText) findViewById(R.id.dateOfBirth);
+        mPhoneView = (AutoCompleteTextView) findViewById(R.id.phoneNumber);
+
+//        populateAutoComplete();
 
         mPasswordView = (EditText) findViewById(R.id.password);
-        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.login || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
-                    return true;
-                }
-                return false;
-            }
-        });
+        mConfirmPasswordView = (EditText) findViewById(R.id.confirmpassword);
 
-        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
-        mEmailSignInButton.setOnClickListener(new OnClickListener() {
+        Button mSignUpButton = (Button) findViewById(R.id.user_sign_up_button);
+        mSignUpButton.setOnClickListener(new OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View v) {
+                //Create new user
+                Date dob = new Date();
+                try {
+                    dob = sdf.parse(mDOBView.getText().toString());
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
+
+                newUser = new User(mUsernameView.getText().toString(), mFirstNameView.getText().toString(), mLastNameView.getText().toString(),
+                        dob,mPhoneView.getText().toString(), mEmailView.getText().toString());
+                //Add user to Database
+
+                //Login as user
                 attemptLogin();
             }
         });
 
-        mLoginFormView = findViewById(R.id.login_form);
+        Button mSignInButton = (Button) findViewById(R.id.user_login_button);
+        mSignInButton.setOnClickListener(new OnClickListener(){
+            @Override
+            public void onClick(View view){
+
+            }
+        });
+
+        mSignupFormView = findViewById(R.id.signup_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        dobValue = Calendar.getInstance();
+
+        final DatePickerDialog.OnDateSetListener onDateSetListener = new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int monthOfYear,
+                                  int dayOfMonth) {
+                // TODO Auto-generated method stub
+                dobValue.set(Calendar.YEAR, year);
+                dobValue.set(Calendar.MONTH, monthOfYear);
+                dobValue.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                updateLabel();
+            }
+
+        };
+
+        mDOBView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // TODO Auto-generated method stub
+                new DatePickerDialog(SignupActivity.this, onDateSetListener, dobValue.get(Calendar.YEAR), dobValue.get(Calendar.MONTH),
+                        dobValue.get(Calendar.DAY_OF_MONTH)).show();
+            }
+        });
+
+
     }
+
+    private void updateLabel() {
+
+        myFormat = "MM/dd/yy"; //In which you need put here
+        sdf = new SimpleDateFormat(myFormat, Locale.US);
+
+        mDOBView.setText(sdf.format(dobValue.getTime()));
+    }
+
 
     private void populateAutoComplete() {
         if (!mayRequestContacts()) {
@@ -119,7 +198,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         }
                     });
         } else {
-            // Permission is just automatically requested and then mayRequestContacts returns false
             requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
         }
         return false;
@@ -212,12 +290,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
             int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-            mLoginFormView.animate().setDuration(shortAnimTime).alpha(
+            mSignupFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+            mSignupFormView.animate().setDuration(shortAnimTime).alpha(
                     show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+                    mSignupFormView.setVisibility(show ? View.GONE : View.VISIBLE);
                 }
             });
 
@@ -233,7 +311,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // The ViewPropertyAnimator APIs are not available, so simply show
             // and hide the relevant UI components.
             mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+            mSignupFormView.setVisibility(show ? View.GONE : View.VISIBLE);
         }
     }
 
@@ -271,7 +349,17 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     }
 
-    private interface ProfileQuery {
+    private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
+        //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
+        ArrayAdapter<String> adapter =
+                new ArrayAdapter<>(SignupActivity.this,
+                        android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
+
+        mEmailView.setAdapter(adapter);
+    }
+
+
+    interface ProfileQuery {
         String[] PROJECTION = {
                 ContactsContract.CommonDataKinds.Email.ADDRESS,
                 ContactsContract.CommonDataKinds.Email.IS_PRIMARY,
@@ -279,16 +367,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         int ADDRESS = 0;
         int IS_PRIMARY = 1;
-    }
-
-
-    private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
-        //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
-        ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(LoginActivity.this,
-                        android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
-
-        mEmailView.setAdapter(adapter);
     }
 
     /**
@@ -328,6 +406,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             return true;
         }
 
+
         @Override
         protected void onPostExecute(final Boolean success) {
             mAuthTask = null;
@@ -347,5 +426,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(false);
         }
     }
+
 }
 
