@@ -2,6 +2,8 @@ package com.appspot.aniekanedwardakai.jireh;
 
 import java.util.Date;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.ListIterator;
 
 /**
  * Created by Teddy on 10/10/2015.
@@ -14,7 +16,7 @@ public class User {
     private UserLocation currentLocation;
     private String phoneNumber;
     private String email;
-    private Review averageRating;
+    private double averageRating; // calculated from coalition of all reviews on user.
     private ArrayList<Service> servicesRequested;
     private ArrayList<Review> reviewsOn;
 
@@ -27,7 +29,7 @@ public class User {
         this.email = email;
         servicesRequested = new ArrayList<Service>();
         reviewsOn = new ArrayList<Review>();
-        averageRating = new Review();
+        averageRating = 0.0;
         currentLocation = new UserLocation();
     }
 
@@ -80,5 +82,27 @@ public class User {
         this.email = email;
     }
 
+    /*
+       Calculate average on the reviews made on the user,
+       i.e sum up rating value and divide by number of reviews made.
+     */
+    public double getCurrentAverageRating() {
+
+        Review selectedReview = new Review();
+        double sumOfRatings = 0.0;
+        int numberOfReviews = reviewsOn.size();
+        if(numberOfReviews==0){
+            averageRating = 0.0;
+        }else{
+            ListIterator<Review> it = reviewsOn.listIterator();
+            while(it.hasNext()){
+                selectedReview = it.next();
+                sumOfRatings += selectedReview.getRating();
+            }
+            averageRating = sumOfRatings/numberOfReviews;
+        }
+
+        return averageRating;
+    }
 
 }
