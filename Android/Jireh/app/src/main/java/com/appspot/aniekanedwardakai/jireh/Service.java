@@ -11,6 +11,7 @@ class Service{
     private String id;
     private User user; //User that requests the service.
     private ServiceProvider serviceProvider; //Service provider that would be supporting this.
+    private ServiceType serviceType; //the type of service being created
 
     private GregorianCalendar scheduledTime; //Time user and service provider have settled on.
     private GregorianCalendar serviceStartTime;
@@ -29,7 +30,24 @@ class Service{
     private boolean hasStartedService = false;
     private boolean hasServiceCompleted = false;
 
+    public Service(User user, ServiceProvider serviceProvider, ServiceType serviceType, GregorianCalendar scheduledTime, double ratePerHour, boolean userProvidesTool) {
+        this.user = user;
+        this.serviceProvider = serviceProvider;
+        this.serviceType = serviceType;
+        this.scheduledTime = scheduledTime;
+        this.ratePerHour = ratePerHour;
+
+        this.userProvidesTool = userProvidesTool;
+    }
+
     //Getters and Setters
+    public ServiceType getServiceType() {
+        return serviceType;
+    }
+
+    public void setServiceType(ServiceType serviceType) {
+        this.serviceType = serviceType;
+    }
 
     public String getId() {
         return id;

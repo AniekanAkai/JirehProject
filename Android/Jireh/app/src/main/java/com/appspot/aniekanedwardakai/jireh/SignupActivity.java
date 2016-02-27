@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -20,6 +21,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -68,8 +70,9 @@ public class SignupActivity extends AppCompatActivity implements LoaderCallbacks
     // UI references.
     private AutoCompleteTextView mEmailView;
     private AutoCompleteTextView mUsernameView;
-    private AutoCompleteTextView mLastNameView;
-    private AutoCompleteTextView mFirstNameView;
+    //private AutoCompleteTextView mLastNameView;
+    //private AutoCompleteTextView mFirstNameView;
+    private AutoCompleteTextView mFullNameView;
     private EditText mDOBView;
     private EditText mPasswordView;
     private EditText mConfirmPasswordView;
@@ -87,15 +90,22 @@ public class SignupActivity extends AppCompatActivity implements LoaderCallbacks
      */
     private GoogleApiClient client;
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup2);
+
+        //connect to Database
+        boolean connectionStatus  = Postgres.connect();
+
         // Set up the signup form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         mUsernameView = (AutoCompleteTextView) findViewById(R.id.username);
-        mLastNameView = (AutoCompleteTextView) findViewById(R.id.last_name);
-        mFirstNameView = (AutoCompleteTextView) findViewById(R.id.first_name);
+        mFullNameView = (AutoCompleteTextView) findViewById(R.id.full_name);
+        //mLastNameView = (AutoCompleteTextView) findViewById(R.id.last_name);
+        //mFirstNameView = (AutoCompleteTextView) findViewById(R.id.first_name);
         mDOBView = (EditText) findViewById(R.id.dateOfBirth);
         mPhoneView = (AutoCompleteTextView) findViewById(R.id.phoneNumber);
 
@@ -116,13 +126,21 @@ public class SignupActivity extends AppCompatActivity implements LoaderCallbacks
                     e.printStackTrace();
                 }
 
-
-                newUser = new User(mUsernameView.getText().toString(), mFirstNameView.getText().toString(), mLastNameView.getText().toString(),
+                //connect to Database
+                newUser = new User(mUsernameView.getText().toString(), mFullNameView.getText().toString(),
                         dob,mPhoneView.getText().toString(), mEmailView.getText().toString());
                 //Add user to Database
-
-                //Login as user
-                attemptLogin();
+                if(TempDB.insertUser(newUser)){
+                    //Login as user
+                    attemptLogin();
+                    Intent i = new Intent(getBaseContext(), LocateServiceActivity.class);
+                    i.putExtra("username", newUser.getUsername());
+                    i.putExtra("full name", newUser.getFullname());
+                    i.putExtra("email", newUser.getEmail());
+                    i.putExtra("rating", newUser.getCurrentAverageRating());
+                    i.putExtra("phone", newUser.getPhoneNumber());
+                    startActivity(i);
+                }
             }
         });
 
@@ -130,7 +148,10 @@ public class SignupActivity extends AppCompatActivity implements LoaderCallbacks
         mSignInButton.setOnClickListener(new OnClickListener(){
             @Override
             public void onClick(View view){
-
+                Intent i = new Intent(getBaseContext(), LoginActivity.class);
+                i.putExtra("username", newUser.getUsername());
+                i.putExtra("password", mPasswordView.getText().toString());
+                startActivity(i);
             }
         });
 
@@ -232,7 +253,7 @@ public class SignupActivity extends AppCompatActivity implements LoaderCallbacks
         mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
-        String email = mEmailView.getText().toString();
+        String email_username = mEmailView.getText().toString();
         String password = mPasswordView.getText().toString();
 
         boolean cancel = false;
@@ -246,11 +267,11 @@ public class SignupActivity extends AppCompatActivity implements LoaderCallbacks
         }
 
         // Check for a valid email address.
-        if (TextUtils.isEmpty(email)) {
+        if (TextUtils.isEmpty(email_username)) {
             mEmailView.setError(getString(R.string.error_field_required));
             focusView = mEmailView;
             cancel = true;
-        } else if (!isEmailValid(email)) {
+        } else if (!isEmailValid(email_username)) {
             mEmailView.setError(getString(R.string.error_invalid_email));
             focusView = mEmailView;
             cancel = true;
@@ -264,7 +285,7 @@ public class SignupActivity extends AppCompatActivity implements LoaderCallbacks
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
+            mAuthTask = new UserLoginTask(email_username, password);
             mAuthTask.execute((Void) null);
         }
     }
@@ -376,11 +397,19 @@ public class SignupActivity extends AppCompatActivity implements LoaderCallbacks
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
         private final String mEmail;
+        private final String mUsername;
         private final String mPassword;
 
-        UserLoginTask(String email, String password) {
-            mEmail = email;
+        UserLoginTask(String email_username, String password) {
+
             mPassword = password;
+            if(isEmailValid(email_username)){
+                mEmail = email_username;
+                mUsername = "";
+            } else {
+                mUsername = email_username;
+                mEmail = "";
+            }
         }
 
         @Override
@@ -388,22 +417,17 @@ public class SignupActivity extends AppCompatActivity implements LoaderCallbacks
             // TODO: attempt authentication against a network service.
 
             try {
-                // Simulate network access.
-                Thread.sleep(2000);
+                // Simulate network access.__ done in signup onClick
+                while(!Postgres.isConnected()){
+                    Postgres.connect();
+                    Log.d("Jireh", "Login Attempt: Waiting to connect to DB");
+                    Thread.sleep(2000);
+                }
             } catch (InterruptedException e) {
                 return false;
             }
-
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
-            }
-
             // TODO: register the new account here.
-            return true;
+            return Postgres.confirmUserCredentials(mEmail, mUsername, mPassword);//true;
         }
 
 

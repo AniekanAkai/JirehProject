@@ -40,7 +40,7 @@
 
                 <EditText android:id="@+id/password" android:layout_width="match_parent"
                     android:layout_height="wrap_content" android:hint="@string/prompt_signup_password"
-                    android:inputType="textVisiblePassword"
+                    android:inputType="textPassword"
                     android:maxLines="1" android:singleLine="true" />
 
             </android.support.design.widget.TextInputLayout>
@@ -51,7 +51,7 @@
 
                 <EditText android:id="@+id/confirmpassword" android:layout_width="match_parent"
                     android:layout_height="wrap_content" android:hint="@string/prompt_signup_confirmpassword"
-                    android:inputType="textVisiblePassword"
+                    android:inputType="textPassword"
                     android:maxLines="1" android:singleLine="true" />
 
             </android.support.design.widget.TextInputLayout>
@@ -92,14 +92,14 @@
             <android.support.design.widget.TextInputLayout android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <AutoCompleteTextView android:id="@+id/first_name" android:layout_width="match_parent"
-                    android:layout_height="wrap_content" android:hint="@string/prompt_firstname"
+                <AutoCompleteTextView android:id="@+id/full_name" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:hint="@string/prompt_fullname"
                     android:inputType="textAutoComplete" android:maxLines="1"
                     android:singleLine="true" />
 
             </android.support.design.widget.TextInputLayout>
 
-            <android.support.design.widget.TextInputLayout android:layout_width="match_parent"
+            <!--android.support.design.widget.TextInputLayout android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
                 <AutoCompleteTextView android:id="@+id/last_name" android:layout_width="match_parent"
@@ -107,7 +107,7 @@
                     android:inputType="textAutoComplete" android:maxLines="1"
                     android:singleLine="true" />
 
-            </android.support.design.widget.TextInputLayout>
+            </android.support.design.widget.TextInputLayout-->
 
 
             <LinearLayout android:orientation="horizontal"

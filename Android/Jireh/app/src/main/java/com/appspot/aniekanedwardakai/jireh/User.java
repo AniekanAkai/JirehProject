@@ -10,8 +10,8 @@ import java.util.ListIterator;
  */
 public class User {
     private String username;
-    private String firstname;
-    private String lastname;
+    private String fullname;
+    //private String lastname;
     private Date dateOfBirth;
     private UserLocation currentLocation;
     private String phoneNumber;
@@ -20,10 +20,10 @@ public class User {
     private ArrayList<Service> servicesRequested;
     private ArrayList<Review> reviewsOn;
 
-    public User(String username, String firstname, String lastname, Date dateOfBirth, String phoneNumber, String email) {
+    public User(String username, String fullname, Date dateOfBirth, String phoneNumber, String email) {
         this.username = username;
-        this.firstname = firstname;
-        this.lastname = lastname;
+        this.fullname = fullname;
+        //this.lastname = lastname;
         this.dateOfBirth = dateOfBirth;
         this.phoneNumber = phoneNumber;
         this.email = email;
@@ -42,20 +42,12 @@ public class User {
         this.username = username;
     }
 
-    public String getFirstname() {
-        return firstname;
+    public String getFullname() {
+        return fullname;
     }
 
-    public void setFirstname(String firstname) {
-        this.firstname = firstname;
-    }
-
-    public String getLastname() {
-        return lastname;
-    }
-
-    public void setLastname(String lastname) {
-        this.lastname = lastname;
+    public void setFullname(String fullname) {
+        this.fullname = fullname;
     }
 
     public Date getDateOfBirth() {
@@ -87,7 +79,6 @@ public class User {
        i.e sum up rating value and divide by number of reviews made.
      */
     public double getCurrentAverageRating() {
-
         Review selectedReview = new Review();
         double sumOfRatings = 0.0;
         int numberOfReviews = reviewsOn.size();
@@ -101,8 +92,29 @@ public class User {
             }
             averageRating = sumOfRatings/numberOfReviews;
         }
-
         return averageRating;
     }
 
+    public UserLocation getCurrentLocation() {
+        return currentLocation;
+    }
+
+    public void setCurrentLocation(UserLocation currentLocation) {
+        this.currentLocation = currentLocation;
+    }
+    public boolean addServiceRequested(Service serviceRequested){
+        return servicesRequested.add(serviceRequested);
+    }
+
+    public boolean removeServiceRequested(Service serviceRequested){
+        return servicesRequested.remove(serviceRequested);
+    }
+
+    public boolean addUserReview(Review userReview){
+        return reviewsOn.add(userReview);
+    }
+
+    public boolean removeUserReview(Review userReview){
+        return reviewsOn.remove(userReview);
+    }
 }

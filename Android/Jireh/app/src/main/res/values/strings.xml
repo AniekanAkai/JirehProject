@@ -23,4 +23,5 @@
     <string name="title_activity_signup">Sign Up</string>
     <string name="title_activity_locate_service">Services available</string>
     <string name="prompt_phonenumber">Phone</string>
+    <string name="prompt_fullname">Full Name</string>
 </resources>
