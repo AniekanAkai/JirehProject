@@ -12,19 +12,19 @@ import java.util.Date;
 public class ServiceProvider extends User {
 
     private GpsStatus location;
-    private int availabiltyRadius=0;
-    private String verificationId;
+    private double availabiltyRadius=0;
+    private String verificationId; //ServiceProvider id(from DB) would be used here.
     private int numberOfCancellations;
-    private int bankInfo;         //acc number, swift no, bank id etc
-    private ServiceType[] servicesOffered;
+    private String bankInfo;         //acc number, swift no, bank id etc
+    private ArrayList<ServiceType> servicesOffered;
     private ArrayList<Service> servicesProvided; //get from service ClassID
     private ArrayList<Review> reviewsOnUser;      // get from service class userReview
 
 
-    public ServiceProvider(String username, String firstname, String lastname, Date dateOfBirth,
-                           String phoneNumber, String email, GpsStatus location, int availabiltyRadius,
-                           String verificationId,int bankInfo,ServiceType[] servicesOffered){
-        super(username, firstname, lastname, dateOfBirth, phoneNumber, email);
+    public ServiceProvider(String username, String fullname, Date dateOfBirth,
+                           String phoneNumber, String email, GpsStatus location, double availabiltyRadius,
+                           String verificationId,String bankInfo,ArrayList<ServiceType> servicesOffered){
+        super(username, fullname, dateOfBirth, phoneNumber, email);
         this.location = location;
         this.availabiltyRadius = availabiltyRadius;
         this.verificationId = verificationId;
@@ -46,13 +46,12 @@ public class ServiceProvider extends User {
         return verificationId;
     }
 
-    public void setVerificationId(String verificationId) {
-        this.verificationId = verificationId;
-    }
+//    public void setVerificationId(String verificationId) {
+//        this.verificationId = verificationId;
+//    }
 
 
     // number of Cancellations
-
     public int getNumberOfCancellations() {
         return numberOfCancellations;
     }
@@ -62,21 +61,30 @@ public class ServiceProvider extends User {
     }
 
     //bankInfo
-    public int getBankInfo() {
+    public String getBankInfo() {
         return bankInfo;
     }
 
-    public void setBankInfo(int bankInfo) {
+    public void setBankInfo(String bankInfo) {
         this.bankInfo = bankInfo;
     }
 
     //Service being provided
-    public ServiceType[] getServicesOffered() {
-        return servicesOffered;
+    public void requestNewServiceTypetoOffer(ServiceType servicetype){
+        if(!servicesOffered.contains(servicetype)){
+            //Send request to Admin
+        }
     }
 
-    public void setServicesOffered(ServiceType[] servicesOffered) {
-        this.servicesOffered = servicesOffered;
+    public boolean removeServicesOffered(ServiceType servicetype) {
+        return servicesOffered.remove(servicetype);
+    }
+
+    public boolean addServicesOffered(ServiceType servicetype) {
+        if(!servicesOffered.contains(servicetype)){
+            servicesOffered.add(servicetype);
+        }
+        return false;
     }
 
     public boolean addServiceProvided(Service serviceProvided){
@@ -87,27 +95,28 @@ public class ServiceProvider extends User {
         return servicesProvided.remove(serviceProvided);
     }
 
-    public boolean addUserReview(Review userReview){
-        return reviewsOnUser.add(userReview);
+    public boolean addServiceProviderReview(Review review){
+        return reviewsOnUser.add(review);
     }
 
-    public boolean removeUserReview(Review userReview){
-        return reviewsOnUser.remove(userReview);
+    public boolean removeServiceProviderReview(Review review){
+        return reviewsOnUser.remove(review);
     }
 
     /* methods*/
-    public void createService(ServiceType serviceType, Location service, Schedule schedule){}  //serviceType, serviceLocation, schedule)
+    public void createService(ServiceType serviceType, Location service, Schedule schedule){}
     public void enterAvailability(Schedule spSchedule){} //spSchedule
     public GpsStatus locateUser(){return null;}
     public void createProfile(){}
     public void editProfile(){}
 
-    public void specifyAvailabilityRadius(int radius){
+    public void setAvailabilityRadius(double radius){
         availabiltyRadius = radius;
     }
 
-    public int getAvailabilityRadius(){return availabiltyRadius;}
+    public double getAvailabilityRadius(){return availabiltyRadius;}
 
     public void makeCommentOnUser(){}
     public void specifyPreferenceToUser(){}
+
 }
