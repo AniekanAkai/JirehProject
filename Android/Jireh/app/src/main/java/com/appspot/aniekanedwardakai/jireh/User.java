@@ -1,45 +1,113 @@
 package com.appspot.aniekanedwardakai.jireh;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.google.android.gms.maps.model.LatLng;
+
+import java.io.Serializable;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.ListIterator;
 
 /**
  * Created by Teddy on 10/10/2015.
  */
-public class User {
-    private String username;
+public class User implements Parcelable{
+    private long id=0;
+    private String password;
     private String fullname;
-    //private String lastname;
     private Date dateOfBirth;
-    private UserLocation currentLocation;
+    private LatLng currentLocation;
     private String phoneNumber;
     private String email;
     private double averageRating; // calculated from coalition of all reviews on user.
     private ArrayList<Service> servicesRequested;
     private ArrayList<Review> reviewsOn;
 
-    public User(String username, String fullname, Date dateOfBirth, String phoneNumber, String email) {
-        this.username = username;
-        this.fullname = fullname;
-        //this.lastname = lastname;
-        this.dateOfBirth = dateOfBirth;
-        this.phoneNumber = phoneNumber;
-        this.email = email;
+
+    public static final Parcelable.Creator<User> CREATOR = new Creator<User>() {
+
+        public User createFromParcel(Parcel source) {
+
+            User mUser = new User();
+
+            mUser.fullname = source.readString();
+
+            mUser.phoneNumber = source.readString();
+
+            mUser.email = source.readString();
+            mUser.dateOfBirth = new Date(source.readLong());
+            mUser.password = source.readString();
+            return mUser;
+        }
+
+        public User[] newArray(int size){
+            return new User[size];
+        }
+
+    };
+
+    public int describeContents() {
+        return 0;
+    }
+
+    public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeString(fullname);
+        parcel.writeString(email);
+        parcel.writeString(password);
+        parcel.writeString(phoneNumber);
+        parcel.writeLong(dateOfBirth.getTime());
+    }
+
+    public User() {
+        this.fullname = "";
+        this.dateOfBirth = new Date();
+        this.phoneNumber = "";
+        this.email = "";
+        this.password = "";
         servicesRequested = new ArrayList<Service>();
         reviewsOn = new ArrayList<Review>();
         averageRating = 0.0;
-        currentLocation = new UserLocation();
+        currentLocation = new LatLng(0,0);
     }
 
 
-    public String getUsername() {
-        return username;
+    public User(String fullname, Date dateOfBirth, String phoneNumber, String email, String password) {
+        this.fullname = fullname;
+        this.dateOfBirth = dateOfBirth;
+        this.phoneNumber = phoneNumber;
+        this.email = email;
+        this.password = password;
+        servicesRequested = new ArrayList<Service>();
+        reviewsOn = new ArrayList<Review>();
+        averageRating = 0.0;
+        currentLocation = new LatLng(0,0);
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public User(long id, String fullname, Date dateOfBirth, String phoneNumber, String email, String password) {
+        this.id = id;
+        this.fullname = fullname;
+        this.dateOfBirth = dateOfBirth;
+        this.phoneNumber = phoneNumber;
+        this.email = email;
+        this.password = password;
+        servicesRequested = new ArrayList<Service>();
+        reviewsOn = new ArrayList<Review>();
+        averageRating = 0.0;
+        currentLocation = new LatLng(0,0);
+    }
+
+
+    public long getID() {
+        return id;
+    }
+
+    public void setID(long ID) {
+        this.id = ID;
     }
 
     public String getFullname() {
@@ -74,6 +142,14 @@ public class User {
         this.email = email;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     /*
        Calculate average on the reviews made on the user,
        i.e sum up rating value and divide by number of reviews made.
@@ -95,11 +171,11 @@ public class User {
         return averageRating;
     }
 
-    public UserLocation getCurrentLocation() {
+    public LatLng getCurrentLocation() {
         return currentLocation;
     }
 
-    public void setCurrentLocation(UserLocation currentLocation) {
+    public void setCurrentLocation(LatLng currentLocation) {
         this.currentLocation = currentLocation;
     }
     public boolean addServiceRequested(Service serviceRequested){
@@ -116,5 +192,18 @@ public class User {
 
     public boolean removeUserReview(Review userReview){
         return reviewsOn.remove(userReview);
+    }
+
+
+    //Methods
+    public void requestService(ServiceProvider sp, ServiceType type, GregorianCalendar scheduledTime,
+                                  double ratePerHour, boolean userProvideTool){
+
+        Service serviceRequest = new Service(this,sp,type,scheduledTime,ratePerHour,userProvideTool);
+        serviceRequest.setStatus("Pending Approval");
+        TempDB.insertService(serviceRequest);
+
+        //Send email/push notification to the service provider
+
     }
 }

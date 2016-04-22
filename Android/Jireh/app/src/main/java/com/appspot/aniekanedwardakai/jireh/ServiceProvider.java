@@ -3,6 +3,8 @@ package com.appspot.aniekanedwardakai.jireh;
 import android.location.GpsStatus;
 import android.location.Location;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -11,7 +13,8 @@ import java.util.Date;
  */
 public class ServiceProvider extends User {
 
-    private GpsStatus location;
+
+    private LatLng location;
     private double availabiltyRadius=0;
     private String verificationId; //ServiceProvider id(from DB) would be used here.
     private int numberOfCancellations;
@@ -21,10 +24,10 @@ public class ServiceProvider extends User {
     private ArrayList<Review> reviewsOnUser;      // get from service class userReview
 
 
-    public ServiceProvider(String username, String fullname, Date dateOfBirth,
-                           String phoneNumber, String email, GpsStatus location, double availabiltyRadius,
+    public ServiceProvider(long id, String fullname, Date dateOfBirth,
+                           String phoneNumber, String email, String password, LatLng location, double availabiltyRadius,
                            String verificationId,String bankInfo,ArrayList<ServiceType> servicesOffered){
-        super(username, fullname, dateOfBirth, phoneNumber, email);
+        super(id, fullname, dateOfBirth, phoneNumber, email, password);
         this.location = location;
         this.availabiltyRadius = availabiltyRadius;
         this.verificationId = verificationId;
@@ -32,11 +35,11 @@ public class ServiceProvider extends User {
         this.servicesOffered = servicesOffered;
     }
     //GPS location
-    public GpsStatus getLocation() {
+    public LatLng getLocation() {
         return location;
     }
 
-    public void setLocation(GpsStatus location) {
+    public void setLocation(LatLng location) {
         this.location = location;
     }
 

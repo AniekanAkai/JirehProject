@@ -3,6 +3,7 @@ package com.appspot.aniekanedwardakai.jireh;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -32,6 +33,7 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 
@@ -42,6 +44,14 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -97,9 +107,6 @@ public class SignupActivity extends AppCompatActivity implements LoaderCallbacks
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup2);
 
-        //connect to Database
-        boolean connectionStatus  = Postgres.connect();
-
         // Set up the signup form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         mUsernameView = (AutoCompleteTextView) findViewById(R.id.username);
@@ -109,8 +116,6 @@ public class SignupActivity extends AppCompatActivity implements LoaderCallbacks
         mDOBView = (EditText) findViewById(R.id.dateOfBirth);
         mPhoneView = (AutoCompleteTextView) findViewById(R.id.phoneNumber);
 
-//        populateAutoComplete();
-
         mPasswordView = (EditText) findViewById(R.id.password);
         mConfirmPasswordView = (EditText) findViewById(R.id.confirmpassword);
 
@@ -118,29 +123,8 @@ public class SignupActivity extends AppCompatActivity implements LoaderCallbacks
         mSignUpButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Create new user
-                Date dob = new Date();
-                try {
-                    dob = sdf.parse(mDOBView.getText().toString());
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
+                registerUser(v);
 
-                //connect to Database
-                newUser = new User(mUsernameView.getText().toString(), mFullNameView.getText().toString(),
-                        dob,mPhoneView.getText().toString(), mEmailView.getText().toString());
-                //Add user to Database
-                if(TempDB.insertUser(newUser)){
-                    //Login as user
-                    attemptLogin();
-                    Intent i = new Intent(getBaseContext(), LocateServiceActivity.class);
-                    i.putExtra("username", newUser.getUsername());
-                    i.putExtra("full name", newUser.getFullname());
-                    i.putExtra("email", newUser.getEmail());
-                    i.putExtra("rating", newUser.getCurrentAverageRating());
-                    i.putExtra("phone", newUser.getPhoneNumber());
-                    startActivity(i);
-                }
             }
         });
 
@@ -149,8 +133,10 @@ public class SignupActivity extends AppCompatActivity implements LoaderCallbacks
             @Override
             public void onClick(View view){
                 Intent i = new Intent(getBaseContext(), LoginActivity.class);
-                i.putExtra("username", newUser.getUsername());
-                i.putExtra("password", mPasswordView.getText().toString());
+                if(newUser != null) {
+                    i.putExtra("email", newUser.getEmail());
+                    i.putExtra("password", mPasswordView.getText().toString());
+                }
                 startActivity(i);
             }
         });
@@ -183,6 +169,259 @@ public class SignupActivity extends AppCompatActivity implements LoaderCallbacks
         });
 
 
+    }
+    /**
+     * Method gets triggered when Sign Up button is clicked
+     *
+     * @param view
+     */
+    private void registerUser(View view){
+
+        //Create new user
+        Date dob = new Date();
+        try {
+            dob = sdf.parse(mDOBView.getText().toString());
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        //connect to Database
+        newUser = new User(mFullNameView.getText().toString(),dob,mPhoneView.getText().toString(),
+                mEmailView.getText().toString(), mPasswordView.getText().toString());
+        // Get NAme ET control value
+        String name = mFullNameView.getText().toString();
+        // Get Email ET control value
+        String email = mEmailView.getText().toString();
+        // Get Password ET control value
+        String password = mPasswordView.getText().toString();
+        // Instantiate Http Request Param Object
+        RequestParams params = new RequestParams();
+        // When Name Edit View, Email Edit View and Password Edit View have values other than Null
+        if(Utility.isNotNull(name) && Utility.isNotNull(email) && Utility.isNotNull(password)){
+            // When Email entered is Valid
+            if(Utility.validate(email)){
+                // Put Http parameter name with value of Name Edit View control
+                params.put("name", name);
+                // Put Http parameter username with value of Email Edit View control
+                params.put("email", email);
+                // Put Http parameter password with value of Password Edit View control
+                params.put("pw", password);
+                params.put("dob", dobValue.getTime().getTime());
+                params.put("phone", mPhoneView.getText().toString());
+                // Invoke RESTful Web Service with Http parameters
+                Log.d("Jireh", params.toString());
+
+                if(TempDB.invokeWSRegister(params, getApplicationContext(), this))
+                {
+                    TempDB.invokeWSLogin(params, getApplicationContext(), this);
+                }
+
+            }
+            // When Email is invalid
+            else{
+                Toast.makeText(getApplicationContext(), "Please enter valid email", Toast.LENGTH_LONG).show();
+            }
+        }
+        // When any of the Edit View control left blank
+        else{
+            Toast.makeText(getApplicationContext(), "Please fill the form, don't leave any field blank", Toast.LENGTH_LONG).show();
+        }
+    }
+    /**
+     * Method that performs RESTful webservice invocations
+     *
+     * @param params
+     */
+    private void invokeWS(RequestParams params){
+        // Show Progress Dialog
+        //prgDialog.show();
+        // Make RESTful webservice call using AsyncHttpClient object
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.get("http://192.168.0.106:8080/restfulTest/register/doregister",params ,new AsyncHttpResponseHandler() {
+            // When the response returned by REST has Http response code '200'
+            @Override
+            public void onSuccess(String response) {
+                // Hide Progress Dialog
+               // prgDialog.hide();
+                try {
+                    // JSON Object
+                    JSONObject obj = new JSONObject(response);
+                    Log.d("Jireh", response);
+                    // When the JSON response has status boolean value assigned with true
+                    if(obj.getBoolean("status")){
+                        // Set Default Values for Edit View controls
+                        setDefaultValues();
+                        // Display successfully registered message using Toast
+                        Toast.makeText(getApplicationContext(), "You are successfully registered!", Toast.LENGTH_LONG).show();
+
+                    }
+                    // Else display error message
+                    else{
+                        //errorMsg.setText(obj.getString("error_msg"));
+                        Toast.makeText(getApplicationContext(), "Response status = false.\n"+obj.getString("error_msg"), Toast.LENGTH_LONG).show();
+                    }
+                } catch (JSONException e) {
+                    // TODO Auto-generated catch block
+                    Toast.makeText(getApplicationContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
+                    e.printStackTrace();
+
+                }
+            }
+            // When the response returned by REST has Http response code other than '200'
+            @Override
+            //public void onFailure(int statusCode, Header[] headers, byte[] response, Throwable error) {
+            public void onFailure(int statusCode, Throwable error, String content) {
+                // Hide Progress Dialog
+               // prgDialog.hide();
+                // When Http response code is '404'
+                if(statusCode == 404){
+                    Toast.makeText(getApplicationContext(), "Requested resource not found", Toast.LENGTH_LONG).show();
+                }
+                // When Http response code is '500'
+                else if(statusCode == 500){
+                    Toast.makeText(getApplicationContext(), "Something went wrong at server end", Toast.LENGTH_LONG).show();
+                }
+                // When Http response code other than 404, 500
+                else{
+                    Toast.makeText(getApplicationContext(), "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet or remote server is not up and running]", Toast.LENGTH_LONG).show();
+                }
+            }
+            /**
+             * Set default values for Edit View controls
+             */
+            public void setDefaultValues(){
+                mUsernameView.setText("");
+                mEmailView.setText("");
+                mPasswordView.setText("");
+            }
+        });
+    }
+
+    private void login(View view){
+        // Instantiate Http Request Param Object
+        String email = mEmailView.getText().toString();
+        String password = mPasswordView.getText().toString();
+
+        RequestParams params = new RequestParams();
+        // When Name Edit View, Email Edit View and Password Edit View have values other than Null
+        if(Utility.isNotNull(email) && Utility.isNotNull(password)){
+            // When Email entered is Valid
+            if(Utility.validate(email)){
+                // Put Http parameter username with value of Email Edit View control
+                params.put("email", email);
+                // Put Http parameter password with value of Password Edit View control
+                params.put("password", password);
+                // Invoke RESTful Web Service with Http parameters
+                Log.d("Jireh", params.toString());
+
+                invokeWSLogin(params);
+            }
+            // When Email is invalid
+            else{
+                Toast.makeText(getApplicationContext(), "Please enter valid email", Toast.LENGTH_LONG).show();
+            }
+        }
+        // When any of the Edit View control left blank
+        else{
+            Toast.makeText(getApplicationContext(), "Please fill the form, don't leave any field blank", Toast.LENGTH_LONG).show();
+        }
+    }
+
+
+    /**
+     * Method that performs RESTful webservice invocations
+     *
+     * @param params
+     */
+    public void invokeWSLogin(RequestParams params){
+        // Show Progress Dialog
+        //prgDialog.show();
+        // Make RESTful webservice call using AsyncHttpClient object
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.get("http://192.168.0.106:8080/restfulTest/login/dologin", params, new AsyncHttpResponseHandler() {
+            // When the response returned by REST has Http response code '200'
+            @Override
+            public void onSuccess(String response) {
+                // Hide Progress Dialog
+                // prgDialog.hide();
+                try {
+                    // JSON Object
+                    JSONObject obj = new JSONObject(response);
+                    Log.d("Jireh", response);
+                    // When the JSON response has status boolean value assigned with true
+                    if (obj.getBoolean("status")) {
+                        User user = new User(obj.getLong("id"), obj.getString("fullname"), (Date) obj.get("dob"), obj.getString("phone"), obj.getString("email"), obj.getString("password"));
+
+                        // Display successfully registered message using Toast
+                        Toast.makeText(getApplicationContext(), "You are successfully logged in!", Toast.LENGTH_LONG).show();
+                        navigatetoLocateServiceActivity(user);
+                    }
+                    // Else display error message
+                    else {
+                        //errorMsg.setText(obj.getString("error_msg"));
+                        Toast.makeText(getApplicationContext(), "Response status = false.\n" + obj.getString("error_msg"), Toast.LENGTH_LONG).show();
+                    }
+                } catch (JSONException e) {
+                    // TODO Auto-generated catch block
+                    Toast.makeText(getApplicationContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
+                    e.printStackTrace();
+                }
+
+            }
+
+            // When the response returned by REST has Http response code other than '200'
+            @Override
+            //public void onFailure(int statusCode, Header[] headers, byte[] response, Throwable error) {
+            public void onFailure(int statusCode, Throwable error, String content) {
+                // Hide Progress Dialog
+                // prgDialog.hide();
+                // When Http response code is '404'
+                if (statusCode == 404) {
+                    Toast.makeText(getApplicationContext(), "Requested resource not found", Toast.LENGTH_LONG).show();
+                }
+                // When Http response code is '500'
+                else if (statusCode == 500) {
+                    Toast.makeText(getApplicationContext(), "Something went wrong at server end", Toast.LENGTH_LONG).show();
+                }
+                // When Http response code other than 404, 500
+                else {
+                    Toast.makeText(getApplicationContext(), "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet or remote server is not up and running]", Toast.LENGTH_LONG).show();
+                }
+            }
+
+            /**
+             * Method which navigates from Register Activity to Login Activity
+             */
+            public void navigatetoLocateServiceActivity(User u){
+                Intent locateIntent = new Intent(getApplicationContext(),LocateServiceActivity.class);
+
+                locateIntent.putExtra("signedInUser",u);
+                // Clears History of Activity
+                locateIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(locateIntent);
+            }
+
+            /**
+             * Set degault values for Edit View controls
+             */
+            public void setDefaultValues() {
+                mEmailView.setText("");
+                mPasswordView.setText("");
+            }
+        });
+    }
+
+    /**
+     * Method which navigates from Register Activity to Login Activity
+     */
+    public void navigatetoLocateServiceActivity(User u, Activity activity){
+        Intent locateIntent = new Intent(getApplicationContext(),LocateServiceActivity.class);
+
+        locateIntent.putExtra("signedInUser", u);
+        // Clears History of Activity
+        locateIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        activity.startActivity(locateIntent);
     }
 
     private void updateLabel() {
