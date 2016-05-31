@@ -2,6 +2,8 @@ package com.appspot.aniekanedwardakai.jireh;
 
 import android.location.Location;
 //import com.google.android.gms.location;
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.GregorianCalendar;
 
 /**
@@ -13,6 +15,7 @@ class Service{
     private ServiceProvider serviceProvider; //Service provider that would be supporting this.
     private ServiceType serviceType; //the type of service being created
 
+
     private GregorianCalendar scheduledTime; //Time user and service provider have settled on.
     private GregorianCalendar serviceStartTime;
     private GregorianCalendar serviceEndTime;
@@ -21,7 +24,7 @@ class Service{
     private Review serviceProviderReview;
 
     private String specialRequests;
-    private Location serviceLocation; //Location where user
+    private LatLng serviceLocation; //Location where user
 
     private double finalBalance; //Calculated from the ratePerHpur
     private double ratePerHour; //This is the price that would be shown.
@@ -30,7 +33,10 @@ class Service{
     private boolean hasStartedService = false;
     private boolean hasServiceCompleted = false;
 
-    public Service(User user, ServiceProvider serviceProvider, ServiceType serviceType, GregorianCalendar scheduledTime, double ratePerHour, boolean userProvidesTool) {
+    private String status = "";//Pending Approval, Approved, Started, In Progress, Complete
+
+    public Service(User user, ServiceProvider serviceProvider, ServiceType serviceType,
+                   GregorianCalendar scheduledTime, double ratePerHour, boolean userProvidesTool) {
         this.user = user;
         this.serviceProvider = serviceProvider;
         this.serviceType = serviceType;
@@ -121,11 +127,11 @@ class Service{
         this.specialRequests = specialRequests;
     }
 
-    public Location getServiceLocation() {
+    public LatLng getServiceLocation() {
         return serviceLocation;
     }
 
-    public void setServiceLocation(Location serviceLocation) {
+    public void setServiceLocation(LatLng serviceLocation) {
         this.serviceLocation = serviceLocation;
     }
 
@@ -168,4 +174,15 @@ class Service{
     public void setHasServiceCompleted(boolean hasServiceCompleted) {
         this.hasServiceCompleted = hasServiceCompleted;
     }
+
+    //Pending Approval, Approved, Started, In Progress, Complete
+    public String getStatus() {
+        return status;
+    }
+
+    //Pending Approval, Approved, Started, In Progress, Complete
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
 }

@@ -3,12 +3,13 @@ package com.appspot.aniekanedwardakai.jireh;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
-
+import com.appspot.aniekanedwardakai.jireh.Utility;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
@@ -19,6 +20,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -28,9 +30,18 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -71,11 +82,18 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         populateAutoComplete();
 
         mPasswordView = (EditText) findViewById(R.id.password);
+
+
+        if(getIntent().hasExtra("email")||getIntent().hasExtra("password")){
+            mEmailView.setText(getIntent().getStringExtra("email"));
+            mPasswordView.setText(getIntent().getStringExtra("password"));
+        }
+
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
                 if (id == R.id.login || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
+                    login(findViewById(id));
                     return true;
                 }
                 return false;
@@ -86,12 +104,129 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                attemptLogin();
+                login(view);
+                //attemptLogin();
             }
         });
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+    }
+
+    private void login(View view){
+        // Instantiate Http Request Param Object
+        String email = mEmailView.getText().toString();
+        String password = mPasswordView.getText().toString();
+
+        RequestParams params = new RequestParams();
+        // When Name Edit View, Email Edit View and Password Edit View have values other than Null
+        if(Utility.isNotNull(email) && Utility.isNotNull(password)){
+            // When Email entered is Valid
+            if(Utility.validate(email)){
+                // Put Http parameter username with value of Email Edit View control
+                params.put("email", email);
+                // Put Http parameter password with value of Password Edit View control
+                params.put("password", password);
+                // Invoke RESTful Web Service with Http parameters
+                Log.d("Jireh", params.toString());
+
+                TempDB.invokeWSLogin(params, getApplicationContext(), this);
+            }
+            // When Email is invalid
+            else{
+                Toast.makeText(getApplicationContext(), "Please enter valid email", Toast.LENGTH_LONG).show();
+            }
+        }
+        // When any of the Edit View control left blank
+        else{
+            Toast.makeText(getApplicationContext(), "Please fill the form, don't leave any field blank", Toast.LENGTH_LONG).show();
+        }
+    }
+
+
+    /**
+     * Method that performs RESTful webservice invocations
+     *
+     * @param params
+     */
+    public void invokeWS(RequestParams params){
+        // Show Progress Dialog
+        //prgDialog.show();
+        // Make RESTful webservice call using AsyncHttpClient object
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.get("http://192.168.0.106:8080/restfulTest/login/dologin",params ,new AsyncHttpResponseHandler() {
+            // When the response returned by REST has Http response code '200'
+            @Override
+            public void onSuccess(String response) {
+                // Hide Progress Dialog
+                // prgDialog.hide();
+                try {
+                    // JSON Object
+                    JSONObject obj = new JSONObject(response);
+                    Log.d("Jireh", response);
+                    // When the JSON response has status boolean value assigned with true
+                    if(obj.getBoolean("status")){
+                        User user = new User(obj.getLong("id"), obj.getString("fullname"),
+                                Utility.toDate(obj.getString("dob")), obj.getString("phone"), obj.getString("email"),
+                                obj.getString("password"));
+
+                        // Display successfully registered message using Toast
+                        Toast.makeText(getApplicationContext(), "You are successfully logged in!", Toast.LENGTH_LONG).show();
+//                        grantUriPermission();
+                        navigatetoLocateServiceActivity(user);
+                    }
+                    // Else display error message
+                    else{
+                        //errorMsg.setText(obj.getString("error_msg"));
+                        Toast.makeText(getApplicationContext(), "Response status = false.\n"+obj.getString("error_msg"), Toast.LENGTH_LONG).show();
+                    }
+                } catch (JSONException e) {
+                    // TODO Auto-generated catch block
+                    Toast.makeText(getApplicationContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
+                    e.printStackTrace();
+                }
+
+            }
+            // When the response returned by REST has Http response code other than '200'
+            @Override
+            //public void onFailure(int statusCode, Header[] headers, byte[] response, Throwable error) {
+            public void onFailure(int statusCode, Throwable error, String content) {
+                // Hide Progress Dialog
+                // prgDialog.hide();
+                // When Http response code is '404'
+                if(statusCode == 404){
+                    Toast.makeText(getApplicationContext(), "Requested resource not found", Toast.LENGTH_LONG).show();
+                }
+                // When Http response code is '500'
+                else if(statusCode == 500){
+                    Toast.makeText(getApplicationContext(), "Something went wrong at server end", Toast.LENGTH_LONG).show();
+                }
+                // When Http response code other than 404, 500
+                else{
+                    Toast.makeText(getApplicationContext(), "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet or remote server is not up and running]", Toast.LENGTH_LONG).show();
+                }
+            }
+
+            /**
+             * Method which navigates from Register Activity to Login Activity
+             */
+            public void navigatetoLocateServiceActivity(User u){
+                Intent locateIntent = new Intent(getApplicationContext(),LocateServiceActivity.class);
+
+//                locateIntent.putExtra("signedInUser",u);
+                // Clears History of Activity
+                locateIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(locateIntent);
+            }
+
+            /**
+             * Set degault values for Edit View controls
+             */
+            public void setDefaultValues(){
+                mEmailView.setText("");
+                mPasswordView.setText("");
+            }
+        });
     }
 
     private void populateAutoComplete() {
@@ -198,7 +333,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     private boolean isPasswordValid(String password) {
         //TODO: Replace this with your own logic
-        return password.length() > 4;
+        return password.length() >= 4;
     }
 
     /**
