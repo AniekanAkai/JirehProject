@@ -213,7 +213,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             public void navigatetoLocateServiceActivity(User u){
                 Intent locateIntent = new Intent(getApplicationContext(),LocateServiceActivity.class);
 
-                locateIntent.putExtra("signedInUser",u);
+//                locateIntent.putExtra("signedInUser",u);
                 // Clears History of Activity
                 locateIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(locateIntent);

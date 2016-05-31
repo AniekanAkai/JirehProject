@@ -80,8 +80,6 @@ public class SignupActivity extends AppCompatActivity implements LoaderCallbacks
     // UI references.
     private AutoCompleteTextView mEmailView;
     private AutoCompleteTextView mUsernameView;
-    //private AutoCompleteTextView mLastNameView;
-    //private AutoCompleteTextView mFirstNameView;
     private AutoCompleteTextView mFullNameView;
     private EditText mDOBView;
     private EditText mPasswordView;
@@ -109,7 +107,7 @@ public class SignupActivity extends AppCompatActivity implements LoaderCallbacks
 
         // Set up the signup form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
-        mUsernameView = (AutoCompleteTextView) findViewById(R.id.username);
+
         mFullNameView = (AutoCompleteTextView) findViewById(R.id.full_name);
         //mLastNameView = (AutoCompleteTextView) findViewById(R.id.last_name);
         //mFirstNameView = (AutoCompleteTextView) findViewById(R.id.first_name);
@@ -395,7 +393,7 @@ public class SignupActivity extends AppCompatActivity implements LoaderCallbacks
             public void navigatetoLocateServiceActivity(User u){
                 Intent locateIntent = new Intent(getApplicationContext(),LocateServiceActivity.class);
 
-                locateIntent.putExtra("signedInUser",u);
+//                locateIntent.putExtra("signedInUser",u);
                 // Clears History of Activity
                 locateIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(locateIntent);
@@ -417,7 +415,7 @@ public class SignupActivity extends AppCompatActivity implements LoaderCallbacks
     public void navigatetoLocateServiceActivity(User u, Activity activity){
         Intent locateIntent = new Intent(getApplicationContext(),LocateServiceActivity.class);
 
-        locateIntent.putExtra("signedInUser", u);
+//        locateIntent.putExtra("signedInUser", u);
         // Clears History of Activity
         locateIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
@@ -425,11 +423,7 @@ public class SignupActivity extends AppCompatActivity implements LoaderCallbacks
     }
 
     private void updateLabel() {
-
-        myFormat = "MM/dd/yy"; //In which you need put here
-        sdf = new SimpleDateFormat(myFormat, Locale.US);
-
-        mDOBView.setText(sdf.format(dobValue.getTime()));
+        mDOBView.setText(Utility.getDisplayDate(dobValue.getTime()));
     }
 
 

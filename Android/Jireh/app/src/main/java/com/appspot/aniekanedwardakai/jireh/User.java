@@ -2,6 +2,7 @@ package com.appspot.aniekanedwardakai.jireh;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.Parcelable.Creator;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -16,52 +17,47 @@ import java.util.ListIterator;
 /**
  * Created by Teddy on 10/10/2015.
  */
-public class User implements Parcelable{
+public class User{
     private long id=0;
-    private String password;
     private String fullname;
+    private String phoneNumber;
     private Date dateOfBirth;
     private LatLng currentLocation;
-    private String phoneNumber;
     private String email;
+    private String password;;
     private double averageRating; // calculated from coalition of all reviews on user.
     private ArrayList<Service> servicesRequested;
     private ArrayList<Review> reviewsOn;
 
 
-    public static final Parcelable.Creator<User> CREATOR = new Creator<User>() {
-
-        public User createFromParcel(Parcel source) {
-
-            User mUser = new User();
-
-            mUser.fullname = source.readString();
-
-            mUser.phoneNumber = source.readString();
-
-            mUser.email = source.readString();
-            mUser.dateOfBirth = new Date(source.readLong());
-            mUser.password = source.readString();
-            return mUser;
-        }
-
-        public User[] newArray(int size){
-            return new User[size];
-        }
-
-    };
-
-    public int describeContents() {
-        return 0;
-    }
-
-    public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeString(fullname);
-        parcel.writeString(email);
-        parcel.writeString(password);
-        parcel.writeString(phoneNumber);
-        parcel.writeLong(dateOfBirth.getTime());
-    }
+//    public static final Creator<User> CREATOR = new Creator<User>() {
+//
+//        @Override
+//        public User createFromParcel(Parcel source) {
+//            return new User(source);
+//        }
+//
+//        @Override
+//        public User[] newArray(int size){
+//            return new User[size];
+//        }
+//
+//    };
+//
+//    @Override
+//    public int describeContents() {
+//        return 0;
+//    }
+//
+//    @Override
+//    public void writeToParcel(Parcel parcel, int flags) {
+//        parcel.writeLong(id);
+//        parcel.writeString(fullname);
+//        parcel.writeString(email);
+//        parcel.writeString(password);
+//        parcel.writeString(phoneNumber);
+//        parcel.writeLong(dateOfBirth.getTime());
+//    }
 
     public User() {
         this.fullname = "";
@@ -74,6 +70,18 @@ public class User implements Parcelable{
         averageRating = 0.0;
         currentLocation = new LatLng(0,0);
     }
+
+//    // De-parcel object
+//    public User(Parcel source){
+//        id = source.readLong();
+//        fullname = source.readString();
+//
+//        phoneNumber = source.readString();
+//
+//        email = source.readString();
+//        dateOfBirth = new Date(source.readLong());
+//        password = source.readString();
+//    }
 
 
     public User(String fullname, Date dateOfBirth, String phoneNumber, String email, String password) {

@@ -24,4 +24,13 @@
     <string name="title_activity_locate_service">Services available</string>
     <string name="prompt_phonenumber">Phone</string>
     <string name="prompt_fullname">Full Name</string>
+    <string name="title_activity_available_services">AvailableServicesActivity</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_user_profile">UserProfileActivity</string>
+
+    <string name="action_update">Update User</string>
 </resources>

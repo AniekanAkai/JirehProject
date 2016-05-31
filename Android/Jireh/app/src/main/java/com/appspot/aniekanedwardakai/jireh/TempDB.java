@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 
+import android.os.Parcel;
 import android.util.Log;
 
 import android.widget.Toast;
@@ -19,7 +20,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -165,7 +168,7 @@ public class TempDB {
         // Make RESTful webservice call using AsyncHttpClient object
 
         AsyncHttpClient client = new AsyncHttpClient();
-        client.get("http://192.168.0.106:8080/restfulTest/login/dologin", params, new AsyncHttpResponseHandler() {
+        client.get("http://192.168.0.104:8080/restfulTest/login/dologin", params, new AsyncHttpResponseHandler() {
             // When the response returned by REST has Http response code '200'
             @Override
             public void onSuccess(String response) {
@@ -178,9 +181,14 @@ public class TempDB {
                     Log.d("Jireh", response);
                     // When the JSON response has status boolean value assigned with true
                     if (obj.getBoolean("status")) {
-                        user = new User(obj.getLong("id"), obj.getString("fullname"),
-                                Utility.toDate(obj.getString("dob")), obj.getString("phone"),
-                                obj.getString("email"), obj.getString("password"));
+
+                        user = new User();
+                        user.setID(obj.getLong("id"));
+                        user.setFullname(obj.getString("fullname"));
+                        user.setPassword(obj.getString("password"));
+                        user.setEmail(obj.getString("email"));
+                        user.setPhoneNumber(obj.getString("phone"));
+                        user.setDateOfBirth(Utility.toDate(obj.getString("dob")));
 
                         // Display successfully registered message using Toast
                         Toast.makeText(context, "You are successfully logged in!", Toast.LENGTH_LONG).show();
@@ -230,7 +238,7 @@ public class TempDB {
         // Make RESTful webservice call using AsyncHttpClient object
         success = false;
         AsyncHttpClient client = new AsyncHttpClient();
-        client.get("http://192.168.0.106:8080/restfulTest/register/doregister",params ,new AsyncHttpResponseHandler() {
+        client.get("http://192.168.0.104:8080/restfulTest/register/doregister",params ,new AsyncHttpResponseHandler() {
             // When the response returned by REST has Http response code '200'
 
             @Override
@@ -285,9 +293,9 @@ public class TempDB {
         //prgDialog.show();
         // Make RESTful webservice call using AsyncHttpClient object
 
-        StringEntity se = new StringEntity(jsonParams, "application/json");
+        Log.d("Jireh", "User JSON: "+ jsonParams);
+        StringEntity se = new StringEntity(jsonParams); //"application/json");
         AsyncHttpClient client = new AsyncHttpClient();
-        HashMap<String, Object> hm = new HashMap<String, Object>();
         client.put(context, "http://192.168.0.104:8080/restfulTest/user/update", se, MediaType.JSON_UTF_8.toString(),
             new AsyncHttpResponseHandler(){
 //              When the response returned by REST has Http response code '200'
@@ -302,13 +310,9 @@ public class TempDB {
                         Log.d("Jireh", response);
                         // When the JSON response has status boolean value assigned with true
                         if (obj.getBoolean("status")) {
-                            user = new User(obj.getLong("id"), obj.getString("fullname"),
-                                    Utility.toDate(obj.getString("dob")), obj.getString("phone"),
-                                    obj.getString("email"), obj.getString("password"));
-
+                            System.out.println(obj.toString());
                             // Display successfully registered message using Toast
-                            Toast.makeText(context, "You are successfully logged in!", Toast.LENGTH_LONG).show();
-                            navigatetoLocateServiceActivity(user, context, activity);
+                            Toast.makeText(context, "Signed in user successfully updated.", Toast.LENGTH_LONG).show();
                         }
                         // Else display error message
                         else {
@@ -322,7 +326,6 @@ public class TempDB {
 
                 // When the response returned by REST has Http response code other than '200'
                 @Override
-                //public void onFailure(int statusCode, Header[] headers, byte[] response, Throwable error) {
                 public void onFailure(int statusCode, Throwable error, String content) {
                     // Hide Progress Dialog
                     // prgDialog.hide();
@@ -343,12 +346,12 @@ public class TempDB {
         return user;
     }
 
-
     public static void navigatetoLocateServiceActivity(User u, Context context, Activity activity){
-        Intent locateIntent = new Intent(context,LocateServiceActivity.class);
-        locateIntent.putExtra("signedInUser",u);
+        Intent locateIntent = new Intent(context, AvailableServicesActivity.class);
+        SignedInUser.getInstance().setUser(u);
+        //locateIntent.putExtra("signedInUser",u);
         // Clears History of Activity
-        locateIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        //locateIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         activity.startActivity(locateIntent);
     }
 }
