@@ -121,8 +121,13 @@ public class SignupActivity extends AppCompatActivity implements LoaderCallbacks
         mSignUpButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                registerUser(v);
-
+                Thread t = new Thread(new Runnable(){
+                    @Override
+                    public void run() {
+                        registerUser();
+                    }
+                });
+                t.start();
             }
         });
 
@@ -170,11 +175,9 @@ public class SignupActivity extends AppCompatActivity implements LoaderCallbacks
     }
     /**
      * Method gets triggered when Sign Up button is clicked
-     *
-     * @param view
-     */
-    private void registerUser(View view){
 
+     */
+    private synchronized void registerUser(){
         //Create new user
         Date dob = new Date();
         try {
@@ -209,19 +212,30 @@ public class SignupActivity extends AppCompatActivity implements LoaderCallbacks
                 // Invoke RESTful Web Service with Http parameters
                 Log.d("Jireh", params.toString());
 
-                if(TempDB.invokeWSRegister(params, getApplicationContext(), this))
-                {
-                    TempDB.invokeWSLogin(params, getApplicationContext(), this);
+                boolean result = TempDB.invokeWSRegister(params, getApplicationContext(), this);
+                try {
+                    Log.d("Jireh", "Waiting for WS response.");
+                    wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
 
-            }
-            // When Email is invalid
-            else{
+                try {
+                    if(TempDB.wsResponse.getBoolean("status")){
+                        TempDB.invokeWSLogin(params, getApplicationContext(), this);
+                    }else {
+                        Utility.displayToastMessage(getApplicationContext(), "Registation failed.\n See response: "+TempDB.wsResponse);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    Utility.displayToastMessage(getApplicationContext(), "Registation failed.\n See response: "+TempDB.wsResponse);
+                }
+            } else {
+                // When Email is invalid
                 Toast.makeText(getApplicationContext(), "Please enter valid email", Toast.LENGTH_LONG).show();
             }
-        }
-        // When any of the Edit View control left blank
-        else{
+        }else{
+            // When any of the Edit View control left blank
             Toast.makeText(getApplicationContext(), "Please fill the form, don't leave any field blank", Toast.LENGTH_LONG).show();
         }
     }
@@ -649,18 +663,19 @@ public class SignupActivity extends AppCompatActivity implements LoaderCallbacks
         protected Boolean doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
 
-            try {
-                // Simulate network access.__ done in signup onClick
-                while(!Postgres.isConnected()){
-                    Postgres.connect();
-                    Log.d("Jireh", "Login Attempt: Waiting to connect to DB");
-                    Thread.sleep(2000);
-                }
-            } catch (InterruptedException e) {
-                return false;
-            }
-            // TODO: register the new account here.
-            return Postgres.confirmUserCredentials(mEmail, mUsername, mPassword);//true;
+//            try {
+//                // Simulate network access.__ done in signup onClick
+//                while(!Postgres.isConnected()){
+//                    Postgres.connect();
+//                    Log.d("Jireh", "Login Attempt: Waiting to connect to DB");
+//                    Thread.sleep(2000);
+//                }
+//            } catch (InterruptedException e) {
+//                return false;
+//            }
+//            // TODO: register the new account here.
+//            return Postgres.confirmUserCredentials(mEmail, mUsername, mPassword);//true;
+            return true;
         }
 
 

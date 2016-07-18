@@ -33,4 +33,8 @@
     <string name="title_activity_user_profile">UserProfileActivity</string>
 
     <string name="action_update">Update User</string>
+    <string name="action_delete">Delete Account</string>
+    <string name="title_activity_delete_account">DeleteAccountActivity</string>
+    <string name="deleteReasonTextAreaLabel">Why are you deleting your account?</string>
+    <string name="action_cancel">Cancel</string>
 </resources>

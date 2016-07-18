@@ -45,9 +45,9 @@ public class LocateServiceActivity extends FragmentActivity implements OnMapRead
 
         LatLng currentLocation = signedInUser.getCurrentLocation();
 
-        // Add a marker in Sydney and move the camera
-//        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(currentLocation).title("Marker in Sydney"));
+        // Add a marker for all the service providers in the available radius
+        //mMap.addMarker(new MarkerOptions().position(currentLocation).title("Marker in Sydney"));
+
         mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
     }
 }
