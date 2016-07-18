@@ -1,5 +1,13 @@
 package com.appspot.aniekanedwardakai.jireh;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.view.MenuItem;
+import android.widget.Toast;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -37,6 +45,14 @@ public class Utility {
         return matcher.matches();
 
     }
+
+    public static void sleepInSeconds(int seconds){
+        try {
+            Thread.sleep(seconds*1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
     /**
      * Checks for Null String object
      *
@@ -49,8 +65,39 @@ public class Utility {
 
     public static String constructJSONFromHashMap(HashMap<String, Object> hashMap)
     {
-
         return "";
+    }
+
+    public static void displayToastMessage(Context context, String msg){
+        Toast.makeText(context,msg, Toast.LENGTH_LONG).show();
+    }
+
+    public static void defaultSidebarHandler(MenuItem item, User signedInUser, Activity activity){
+        int id = item.getItemId();
+
+        if (id == R.id.nav_profile) {
+            //Open User details page
+            Intent locateIntent = new Intent(activity, UserProfileActivity.class);
+            SignedInUser.getInstance().setUser(signedInUser);
+            // Clears History of Activity
+            //locateIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            activity.startActivity(locateIntent);
+
+        } else if (id == R.id.nav_payment) {
+
+        } else if (id == R.id.nav_history) {
+
+        } else if (id == R.id.nav_settings) {
+
+        } else if (id == R.id.nav_signout) {
+            Utility.signOut(activity);
+        }else if(id == R.id.nav_become_a_service_provider){
+
+        }
+
+        DrawerLayout drawer = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+
     }
 
     public static JSONObject constructUserJSON(User u)
@@ -182,5 +229,12 @@ public class Utility {
             e.printStackTrace();
         }
         return date;
+    }
+
+    public static void signOut(Context context)
+    {
+        Intent signInIntent = new Intent(context, LoginActivity.class);//this, UserProfileActivity.class);
+        SignedInUser.setUser(null);
+        context.startActivity(signInIntent);
     }
 }

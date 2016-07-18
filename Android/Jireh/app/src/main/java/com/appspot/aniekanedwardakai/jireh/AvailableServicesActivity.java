@@ -42,6 +42,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.Manifest.permission.READ_CONTACTS;
@@ -70,6 +71,8 @@ public class AvailableServicesActivity extends AppCompatActivity
 
     private JSONObject userjson = new JSONObject();
     private JSONArray updates = new JSONArray();
+
+    private ArrayList<LatLng> availableServiceProviders = new ArrayList<LatLng>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,6 +127,10 @@ public class AvailableServicesActivity extends AppCompatActivity
 //        userFullName_header.setText(signedInUser.getFullname());
         userEmail_header = (TextView) findViewById(R.id.userEmail_Header);
 //        userEmail_header.setText(signedInUser.getEmail());
+
+        //Get all the services in the user defined radius, that are within the service provider's availability radius.
+        availableServiceProviders = TempDB.getAvailableServiceProviders();
+
     }
 
     @Override
@@ -171,29 +178,7 @@ public class AvailableServicesActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.nav_profile) {
-            //Open User details page
-            Intent locateIntent = new Intent(this, UserProfileActivity.class);
-//            locateIntent.putExtra("signedInUserToUpdate", signedInUser);
-            SignedInUser.getInstance().setUser(signedInUser);
-            // Clears History of Activity
-            //locateIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(locateIntent);
-
-        } else if (id == R.id.nav_payment) {
-
-        } else if (id == R.id.nav_history) {
-
-        } else if (id == R.id.nav_settings) {
-
-        } else if (id == R.id.nav_signout) {
-
-        }
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
+        Utility.defaultSidebarHandler(item, signedInUser, this);
         return true;
     }
 
@@ -219,16 +204,16 @@ public class AvailableServicesActivity extends AppCompatActivity
         Log.d(TAG, "Map ready, showing current location, " + signedInUser.getCurrentLocation().toString());
         // Add a marker in Sydney and move the camera
 //        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(signedInUser.getCurrentLocation()).title("I'm here."));
+        //mMap.addMarker(new MarkerOptions().position(signedInUser.getCurrentLocation()).title("I'm here."));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(signedInUser.getCurrentLocation()));
     }
 
     private void updateUserMarker()
     {
         Log.d(TAG, "New Location updated to " + signedInUser.getCurrentLocation().toString());
-        // Add a marker in Sydney and move the camera
-//        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(signedInUser.getCurrentLocation()).title("I'm here."));
+        // Add a marker for all the service providers in the available radius
+
+        //mMap.addMarker(new MarkerOptions().position(signedInUser.getCurrentLocation()).title("I'm here."));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(signedInUser.getCurrentLocation()));
     }
 

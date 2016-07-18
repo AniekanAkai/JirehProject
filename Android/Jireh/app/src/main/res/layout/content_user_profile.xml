@@ -77,16 +77,20 @@
 
     </android.support.design.widget.TextInputLayout>
 
-    <LinearLayout android:orientation="horizontal"
+    <LinearLayout android:orientation="vertical"
         android:padding="5dp"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:gravity="center_horizontal|bottom">
 
         <Button android:id="@+id/user_update_button" style="?android:textAppearanceLarge"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_width="match_parent" android:layout_height="50dp"
             android:layout_marginTop="16dp" android:text="@string/action_update"
             android:textStyle="bold"/>
+
+        <Button android:id="@+id/user_delete_button" style="?android:textAppearanceLarge"
+            android:layout_width="match_parent" android:layout_height="50dp" android:textColor="@android:color/holo_red_dark"
+            android:text="@string/action_delete" />
 
     </LinearLayout>
 
