@@ -21,8 +21,27 @@
             android:title="Become a Service Provider"/>
     </group>
 
+    <item android:title="Service Provider options">
+        <menu>
+            <item
+                android:id="@+id/nav_schedule"
+                android:icon="@mipmap/ic_menu_schedule"
+                android:title="Schedule" />
+            <!--item
+                android:id="@+id/nav_"
+                android:icon="@mipmap/ic_menu_signout"
+                android:title="Sign Out" /-->
+        </menu>
+    </item>
+
+
     <item android:title="More...">
         <menu>
+            <item
+                android:id="@+id/nav_serviceproviderrequests"
+                android:icon="@mipmap/ic_menu_serviceproviderrequests"
+                android:title="Service Provider Requests"/>
+
             <item
                 android:id="@+id/nav_settings"
                 android:icon="@mipmap/ic_menu_settings"

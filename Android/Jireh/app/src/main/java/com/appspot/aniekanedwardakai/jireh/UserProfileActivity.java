@@ -55,7 +55,7 @@ public class UserProfileActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 
         setSupportActionBar(toolbar);
-        
+
         signedInUser = SignedInUser.getInstance().getUser();
         userjson = new JSONObject();
         updates = new JSONArray();
@@ -128,6 +128,22 @@ public class UserProfileActivity extends AppCompatActivity
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        Menu menu = navigationView.getMenu();
+        MenuItem becomeAServiceProvider = menu.findItem(R.id.nav_become_a_service_provider);
+        MenuItem schedule = menu.findItem(R.id.nav_schedule);
+        MenuItem serviceProviderRequests = menu.findItem(R.id.nav_serviceproviderrequests);
+
+
+        //Set menu items to hide when signed in as admin.
+        if(!signedInUser.isAdmin()){
+            serviceProviderRequests.setVisible(false);
+        }
+
+        //Set menu items to hide when not signed in as service provider
+        if(!SignedInUser.isSignedInAsServiceProvider()){
+            schedule.setVisible(false);
+            becomeAServiceProvider.setVisible(true);
+        }
         navigationView.setNavigationItemSelectedListener(this);
 
         userFullName_header = (TextView) findViewById(R.id.userFullName_Header);

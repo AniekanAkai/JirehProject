@@ -37,4 +37,8 @@
     <string name="title_activity_delete_account">DeleteAccountActivity</string>
     <string name="deleteReasonTextAreaLabel">Why are you deleting your account?</string>
     <string name="action_cancel">Cancel</string>
+    <string name="title_activity_become_aservice_provider">BecomeAServiceProviderActivity</string>
+    <string name="title_activity_service_provider_request_complete">
+        ServiceProviderRequestCompleteActivity
+    </string>
 </resources>

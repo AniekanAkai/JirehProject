@@ -121,13 +121,7 @@ public class SignupActivity extends AppCompatActivity implements LoaderCallbacks
         mSignUpButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Thread t = new Thread(new Runnable(){
-                    @Override
-                    public void run() {
-                        registerUser();
-                    }
-                });
-                t.start();
+                registerUser();
             }
         });
 
@@ -177,7 +171,7 @@ public class SignupActivity extends AppCompatActivity implements LoaderCallbacks
      * Method gets triggered when Sign Up button is clicked
 
      */
-    private synchronized void registerUser(){
+    private void registerUser(){
         //Create new user
         Date dob = new Date();
         try {
@@ -212,19 +206,13 @@ public class SignupActivity extends AppCompatActivity implements LoaderCallbacks
                 // Invoke RESTful Web Service with Http parameters
                 Log.d("Jireh", params.toString());
 
-                boolean result = TempDB.invokeWSRegister(params, getApplicationContext(), this);
-                try {
-                    Log.d("Jireh", "Waiting for WS response.");
-                    wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                TempDB.invokeWSRegister(params, getApplicationContext(), this);
 
                 try {
                     if(TempDB.wsResponse.getBoolean("status")){
-                        TempDB.invokeWSLogin(params, getApplicationContext(), this);
+                        Utility.displayToastMessage(getApplicationContext(), "Registration successful.\n See response: "+TempDB.wsResponse);
                     }else {
-                        Utility.displayToastMessage(getApplicationContext(), "Registation failed.\n See response: "+TempDB.wsResponse);
+                        Utility.displayToastMessage(getApplicationContext(), "Registration failed.\n See response: "+TempDB.wsResponse);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();

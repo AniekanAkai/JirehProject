@@ -19,6 +19,8 @@ import java.util.ListIterator;
  */
 public class User{
     private long id=0;
+
+    private boolean isAdmin = false;
     private String fullname;
     private String phoneNumber;
     private Date dateOfBirth;
@@ -29,35 +31,6 @@ public class User{
     private ArrayList<Service> servicesRequested;
     private ArrayList<Review> reviewsOn;
 
-
-//    public static final Creator<User> CREATOR = new Creator<User>() {
-//
-//        @Override
-//        public User createFromParcel(Parcel source) {
-//            return new User(source);
-//        }
-//
-//        @Override
-//        public User[] newArray(int size){
-//            return new User[size];
-//        }
-//
-//    };
-//
-//    @Override
-//    public int describeContents() {
-//        return 0;
-//    }
-//
-//    @Override
-//    public void writeToParcel(Parcel parcel, int flags) {
-//        parcel.writeLong(id);
-//        parcel.writeString(fullname);
-//        parcel.writeString(email);
-//        parcel.writeString(password);
-//        parcel.writeString(phoneNumber);
-//        parcel.writeLong(dateOfBirth.getTime());
-//    }
 
     public User() {
         this.fullname = "";
@@ -70,18 +43,6 @@ public class User{
         averageRating = 0.0;
         currentLocation = new LatLng(0,0);
     }
-
-//    // De-parcel object
-//    public User(Parcel source){
-//        id = source.readLong();
-//        fullname = source.readString();
-//
-//        phoneNumber = source.readString();
-//
-//        email = source.readString();
-//        dateOfBirth = new Date(source.readLong());
-//        password = source.readString();
-//    }
 
 
     public User(String fullname, Date dateOfBirth, String phoneNumber, String email, String password) {
@@ -109,6 +70,13 @@ public class User{
         currentLocation = new LatLng(0,0);
     }
 
+    public boolean isAdmin() {
+        return isAdmin;
+    }
+
+    public void setAdmin(boolean admin) {
+        isAdmin = admin;
+    }
 
     public long getID() {
         return id;

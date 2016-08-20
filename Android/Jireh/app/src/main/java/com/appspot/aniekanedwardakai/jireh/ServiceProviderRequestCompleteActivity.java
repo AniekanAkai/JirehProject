@@ -1,6 +1,5 @@
 package com.appspot.aniekanedwardakai.jireh;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -15,40 +14,24 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
-import android.widget.MultiAutoCompleteTextView;
-import android.widget.Toast;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.UnsupportedEncodingException;
-import java.util.Date;
-
-public class DeleteAccountActivity extends AppCompatActivity
+public class ServiceProviderRequestCompleteActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private Button confirmDeleteButton;
-    private Button cancelDeleteButton;
-    private MultiAutoCompleteTextView deleteReasonTextArea;
+
     private User signedInUser;
+    MenuItem becomeAServiceProvider;
+    MenuItem schedule;
+    MenuItem serviceProviderRequests;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_delete_account);
+        setContentView(R.layout.activity_service_provider_request_complete);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         signedInUser = SignedInUser.getUser();
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -75,56 +58,25 @@ public class DeleteAccountActivity extends AppCompatActivity
         }
         navigationView.setNavigationItemSelectedListener(this);
 
-        confirmDeleteButton = (Button) findViewById(R.id.confirmDeleteButton);
-        cancelDeleteButton = (Button) findViewById(R.id.cancelDeleteActionButton);
-        deleteReasonTextArea = (MultiAutoCompleteTextView) findViewById(R.id.deleteReasonTextArea);
-
-        confirmDeleteButton.setOnClickListener(new View.OnClickListener(){
+        Button continueAsUser = (Button) findViewById(R.id.continueAsUser);
+        continueAsUser.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view){
-                deleteUser();
+            public void onClick(View v) {
+                goToMain();
             }
         });
 
-        cancelDeleteButton.setOnClickListener(new View.OnClickListener(){
+        Button updateServiceProvider = (Button) findViewById(R.id.serviceProviderInformation);
+        updateServiceProvider.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view){
-                Intent profileIntent = new Intent(getApplicationContext(), UserProfileActivity.class);
-                SignedInUser.getInstance().setUser(signedInUser);
-                startActivity(profileIntent);
+            public void onClick(View v) {
+                Log.d("Jireh", "Service providers to be updated.");
             }
         });
-
     }
 
-    private synchronized void deleteUser() {
-
-        JSONObject jsonObject = new JSONObject();
-        String reason = deleteReasonTextArea.getText().toString();
-        try {
-            jsonObject.put("id", signedInUser.getID());
-            jsonObject.put("email", signedInUser.getEmail());
-            jsonObject.put("reason", reason);
-            jsonObject.put("time", Utility.getDisplayDate(new Date()));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        //Invoke web service to delete user
-
-        try {
-            int time=0;
-            boolean result = TempDB.removeUser(jsonObject.toString(), getApplicationContext(), this);
-//            if(result){
-//                Toast.makeText(getApplicationContext(),"Account deleted successfully", Toast.LENGTH_LONG).show();
-//                //sign out
-//                Utility.signOut(this);
-//            }else{
-//                Toast.makeText(getApplicationContext(),"Account deleted failed.", Toast.LENGTH_LONG).show();
-//            }
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+    private void goToMain() {
+        TempDB.navigatetoLocateServiceActivity(SignedInUser.getUser(), getApplicationContext(), this);
     }
 
     @Override
@@ -140,7 +92,8 @@ public class DeleteAccountActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.delete_account, menu);
+        getMenuInflater().inflate(R.menu.service_provider_request_complete, menu);
+
         return true;
     }
 
@@ -155,6 +108,7 @@ public class DeleteAccountActivity extends AppCompatActivity
         if (id == R.id.action_settings) {
             return true;
         }
+
         return super.onOptionsItemSelected(item);
     }
 

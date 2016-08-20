@@ -6,6 +6,8 @@ package com.appspot.aniekanedwardakai.jireh;
 public class SignedInUser {
 
     private static User user;
+
+    private static boolean signedInAsServiceProvider = false;
     private static SignedInUser ourInstance = new SignedInUser();
 
     public static SignedInUser getInstance() {
@@ -22,5 +24,13 @@ public class SignedInUser {
 
     public static User getUser(){
         return user;
+    }
+
+    public static boolean isSignedInAsServiceProvider() {
+        return signedInAsServiceProvider;
+    }
+
+    public static void setSignedInAsServiceProvider(boolean signedInAsServiceProvider) {
+        SignedInUser.signedInAsServiceProvider = signedInAsServiceProvider;
     }
 }

@@ -89,6 +89,24 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.appspot.aniekanedwardakai.jireh.AvailableServicesActivity" />
         </activity>
+        <activity
+            android:name=".BecomeAServiceProviderActivity"
+            android:label="@string/title_activity_become_aservice_provider"
+            android:parentActivityName=".AvailableServicesActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.appspot.aniekanedwardakai.jireh.AvailableServicesActivity" />
+        </activity>
+        <activity
+            android:name=".ServiceProviderRequestCompleteActivity"
+            android:label="@string/title_activity_service_provider_request_complete"
+            android:parentActivityName=".BecomeAServiceProviderActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.appspot.aniekanedwardakai.jireh.BecomeAServiceProviderActivity" />
+        </activity>
     </application>
 
 </manifest>
