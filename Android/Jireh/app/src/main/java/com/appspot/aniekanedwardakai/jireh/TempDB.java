@@ -15,7 +15,9 @@ import com.google.common.net.MediaType;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
+import com.mysql.jdbc.StringUtils;
 
+import org.apache.http.Header;
 import org.apache.http.entity.StringEntity;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,11 +44,67 @@ public class TempDB {
     protected static ModifiableBooleanValue success = new ModifiableBooleanValue(false);
     protected static JSONObject wsResponse = new JSONObject();
 
-    public static boolean insertServiceProvider(ServiceProvider newServiceProvider){
-        //TODO Update to use webservice call
-        startCount = tempServiceProviders.size();
-        tempServiceProviders.add(newServiceProvider);
-        return (tempServiceProviders.size() == (startCount+1));
+    public static boolean insertServiceProvider(ServiceProvider newServiceProvider, final Context context, final Activity activity) throws UnsupportedEncodingException {
+        JSONObject json = Utility.constructServiceProviderJSON(newServiceProvider);
+        Log.d("Jireh", "Service Provider JSON: "+ json);
+        StringEntity se = new StringEntity(json.toString());
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.put(context, "http://104.196.60.217:8080/restfulTest/serviceprovider/create", se, MediaType.JSON_UTF_8.toString(),
+//        client.put(context, "http://192.168.0.106:8080/restfulTest/serviceProvider/create", se, MediaType.JSON_UTF_8.toString(),
+                new AsyncHttpResponseHandler(){
+                    // When the response returned by REST has Http response code '200'
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                        // Hide Progress Dialog
+                        try {
+                            String response = StringUtils.toAsciiString(responseBody);
+                            // JSON Object
+                            wsResponse = new JSONObject(response);
+                            Log.d("Jireh", response);
+                            // When the JSON response has status boolean value assigned with true
+                            if(wsResponse.getBoolean("status")){
+                                // Display successfully registered message using Toast
+                                Toast.makeText(context, "Service Provider request is successfully created!", Toast.LENGTH_LONG).show();
+                                success = new ModifiableBooleanValue(true);
+                                Intent completed = new Intent(context, ServiceProviderRequestCompleteActivity.class);
+                                completed.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                context.startActivity(completed);
+                            }
+                            // Else display error message
+                            else{
+                                //errorMsg.setText(wsResponse.getString("error_msg"));
+                                Toast.makeText(context, "Response status = false.\n"+wsResponse.getString("error_msg"), Toast.LENGTH_LONG).show();
+                                success = new ModifiableBooleanValue(false);
+                            }
+                        } catch (JSONException e) {
+                            Toast.makeText(context, "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
+                            e.printStackTrace();
+                            success = new ModifiableBooleanValue(false);
+                        }
+                    }
+                    // When the response returned by REST has Http response code other than '200'
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, byte[] response, Throwable error) {
+                        // Hide Progress Dialog
+                        // prgDialog.hide();
+                        // When Http response code is '404'
+                        if(statusCode == 404){
+                            Toast.makeText(context, "Requested resource not found", Toast.LENGTH_LONG).show();
+                            success = new ModifiableBooleanValue(false);
+                        }
+                        // When Http response code is '500'
+                        else if(statusCode == 500){
+                            Toast.makeText(context, "Something went wrong at server end", Toast.LENGTH_LONG).show();
+                            success = new ModifiableBooleanValue(false);
+                        }
+                        // When Http response code other than 404, 500
+                        else{
+                            Toast.makeText(context, "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet or remote server is not up and running]", Toast.LENGTH_LONG).show();
+                            success = new ModifiableBooleanValue(false);
+                        }
+                    }
+                });
+        return success.getValue();
     }
     public static boolean insertService(Service newService){
         //TODO Update to use webservice call
@@ -56,19 +114,18 @@ public class TempDB {
     }
 
     public static boolean removeUser(String json, final Context context, final Activity activity) throws UnsupportedEncodingException {
-        //TODO Update to use webservice call
         // Make RESTful webservice call using AsyncHttpClient object
         Log.d("Jireh", "Deleting User JSON: "+ json);
         StringEntity se = new StringEntity(json);
         AsyncHttpClient client = new AsyncHttpClient();
-        //client.get("http://104.196.60.217:8080/restfulTest/user/delete", new AsyncHttpResponseHandler() {
         client.put(context, "http://104.196.60.217:8080/restfulTest/user/delete", se, MediaType.JSON_UTF_8.toString(),
                 new AsyncHttpResponseHandler(){
             // When the response returned by REST has Http response code '200'
             @Override
-            public void onSuccess(String response) {
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 // Hide Progress Dialog
                 try {
+                    String response = StringUtils.toAsciiString(responseBody);
                     // JSON Object
                     wsResponse = new JSONObject(response);
                     Log.d("Jireh", response);
@@ -77,10 +134,11 @@ public class TempDB {
                         // Display successfully registered message using Toast
                         Toast.makeText(context, "User is successfully deleted!", Toast.LENGTH_LONG).show();
                         success = new ModifiableBooleanValue(true);
+                        //sign out
+                        Utility.signOut(context);
                     }
                     // Else display error message
                     else{
-                        //errorMsg.setText(wsResponse.getString("error_msg"));
                         Toast.makeText(context, "Response status = false.\n"+wsResponse.getString("error_msg"), Toast.LENGTH_LONG).show();
                         success = new ModifiableBooleanValue(false);
                     }
@@ -92,8 +150,7 @@ public class TempDB {
             }
             // When the response returned by REST has Http response code other than '200'
             @Override
-            //public void onFailure(int statusCode, Header[] headers, byte[] response, Throwable error) {
-            public void onFailure(int statusCode, Throwable error, String content) {
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
                 // Hide Progress Dialog
                 // prgDialog.hide();
                 // When Http response code is '404'
@@ -148,13 +205,13 @@ public class TempDB {
             }else if(it.next().equals("bankInfo")){
                 serviceProvider.setBankInfo(String.valueOf(updates.get("bankInfo")));
             }else if(it.next().equals("location")){
-                serviceProvider.setLocation((LatLng) updates.get("location"));
+                serviceProvider.setLocation(updates.get("location").toString());
             }else if(it.next().equals("serviceProvided")){
                 serviceProvider.addServiceProvided((Service) updates.get("serviceProvided"));
             }else if(it.next().equals("reviewsOn")){
                 serviceProvider.addServiceProviderReview((Review) updates.get("reviewsOn"));
             }else if(it.next().equals("serviceTypeOffering")){
-                serviceProvider.addServicesOffered((ServiceType) updates.get("serviceTypeOffering"));
+                serviceProvider.addServicesOffered(updates.get("serviceTypeOffering").toString());
             }
         }
 
@@ -220,20 +277,22 @@ public class TempDB {
         // Make RESTful webservice call using AsyncHttpClient object
 
         AsyncHttpClient client = new AsyncHttpClient();
+
         client.get("http://104.196.60.217:8080/restfulTest/login/dologin", params, new AsyncHttpResponseHandler() {
+//          client.get("http://192.168.0.106:8080/restfulTest/login/dologin", params, new AsyncHttpResponseHandler() {
             // When the response returned by REST has Http response code '200'
             @Override
-            public void onSuccess(String response) {
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 // Hide Progress Dialog
                 // prgDialog.hide();
                 try {
+                    String response = StringUtils.toAsciiString(responseBody);
                     // JSON Object
                     wsResponse = new JSONObject(response);
 
                     Log.d("Jireh", response);
                     // When the JSON response has status boolean value assigned with true
                     if (wsResponse.getBoolean("status")) {
-
                         user = new User();
                         user.setID(wsResponse.getLong("id"));
                         user.setFullname(wsResponse.getString("fullname"));
@@ -241,6 +300,7 @@ public class TempDB {
                         user.setEmail(wsResponse.getString("email"));
                         user.setPhoneNumber(wsResponse.getString("phone"));
                         user.setDateOfBirth(Utility.toDate(wsResponse.getString("dob")));
+                        user.setAdmin(wsResponse.getBoolean("isAdmin"));
 
                         // Display successfully registered message using Toast
                         Toast.makeText(context, "You are successfully logged in!", Toast.LENGTH_LONG).show();
@@ -258,8 +318,7 @@ public class TempDB {
 
             // When the response returned by REST has Http response code other than '200'
             @Override
-            //public void onFailure(int statusCode, Header[] headers, byte[] response, Throwable error) {
-            public void onFailure(int statusCode, Throwable error, String content) {
+            public void onFailure(int statusCode, Header[] headers, byte[] response, Throwable error) {
                 // Hide Progress Dialog
                 // prgDialog.hide();
                 // When Http response code is '404'
@@ -282,7 +341,7 @@ public class TempDB {
      * Method that performs RESTful webservice invocations
      * @param params
      */
-    protected synchronized static boolean invokeWSRegister(final RequestParams params, final Context context, final Activity activity){
+    protected static boolean invokeWSRegister(final RequestParams params, final Context context, final Activity activity){
         // Show Progress Dialog
         //prgDialog.show();
         // Make RESTful webservice call using AsyncHttpClient object
@@ -291,23 +350,28 @@ public class TempDB {
         client.get("http://104.196.60.217:8080/restfulTest/register/doregister",params ,new AsyncHttpResponseHandler() {
             // When the response returned by REST has Http response code '200'
 
+
             @Override
-            public synchronized void onSuccess(String response) {
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 // Hide Progress Dialog
                 // prgDialog.hide();
                 try {
+                    String response = StringUtils.toAsciiString(responseBody);
                     // JSON Object
                     wsResponse = new JSONObject(response);
                     Log.d("Jireh", response);
                     // When the JSON response has status boolean value assigned with true
                     if(wsResponse.getBoolean("status")){
                         // Display successfully registered message using Toast
-                        //Toast.makeText(context, "You are successfully registered!", Toast.LENGTH_LONG).show();
-                        success = new ModifiableBooleanValue(true);
+                        Toast.makeText(context, "You are successfully registered!", Toast.LENGTH_LONG).show();
+                        params.remove("dob");
+                        params.remove("phone");
+                        params.remove("name");
+
+                        TempDB.invokeWSLogin(params, context, activity);
                     }
                     // Else display error message
                     else{
-                        //errorMsg.setText(wsResponse.getString("error_msg"));
                         Toast.makeText(context, "Response status = false.\n"+wsResponse.getString("error_msg"), Toast.LENGTH_LONG).show();
                         success = new ModifiableBooleanValue(false);
                     }
@@ -315,15 +379,15 @@ public class TempDB {
                     Toast.makeText(context, "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
                     e.printStackTrace();
                 }
-                notifyAll();
             }
             // When the response returned by REST has Http response code other than '200'
             @Override
             //public void onFailure(int statusCode, Header[] headers, byte[] response, Throwable error) {
-            public synchronized void onFailure(int statusCode, Throwable error, String content) {
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
                 // Hide Progress Dialog
                 // prgDialog.hide();
                 // When Http response code is '404'
+                String response = StringUtils.toAsciiString(responseBody);
                 if(statusCode == 404){
                     Toast.makeText(context, "Requested resource not found", Toast.LENGTH_LONG).show();
                 }
@@ -336,7 +400,6 @@ public class TempDB {
                     Toast.makeText(context, "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet or remote server is not up and running]", Toast.LENGTH_LONG).show();
                 }
                 success = new ModifiableBooleanValue(false);
-                notifyAll();
             }
         });
 

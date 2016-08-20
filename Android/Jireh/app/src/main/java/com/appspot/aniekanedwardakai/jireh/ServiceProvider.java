@@ -7,26 +7,27 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by Teddy on 10/10/2015.
  */
 public class ServiceProvider extends User {
 
-
-    private LatLng location;
+    private String photo;
+    private String location;
     private double availabiltyRadius=0;
     private String verificationId; //ServiceProvider id(from DB) would be used here.
     private int numberOfCancellations;
     private String bankInfo;         //acc number, swift no, bank id etc
-    private ArrayList<ServiceType> servicesOffered;
+    private List<String> servicesOffered;
     private ArrayList<Service> servicesProvided; //get from service ClassID
     private ArrayList<Review> reviewsOnUser;      // get from service class userReview
 
 
     public ServiceProvider(long id, String fullname, Date dateOfBirth,
-                           String phoneNumber, String email, String password, LatLng location, double availabiltyRadius,
-                           String verificationId,String bankInfo,ArrayList<ServiceType> servicesOffered){
+                           String phoneNumber, String email, String password, String location, double availabiltyRadius,
+                           String verificationId,String bankInfo,List<String> servicesOffered){
         super(id, fullname, dateOfBirth, phoneNumber, email, password);
         this.location = location;
         this.availabiltyRadius = availabiltyRadius;
@@ -35,11 +36,11 @@ public class ServiceProvider extends User {
         this.servicesOffered = servicesOffered;
     }
     //GPS location
-    public LatLng getLocation() {
+    public String getLocation() {
         return location;
     }
 
-    public void setLocation(LatLng location) {
+    public void setLocation(String location) {
         this.location = location;
     }
 
@@ -79,11 +80,11 @@ public class ServiceProvider extends User {
         }
     }
 
-    public boolean removeServicesOffered(ServiceType servicetype) {
+    public boolean removeServicesOffered(String servicetype) {
         return servicesOffered.remove(servicetype);
     }
 
-    public boolean addServicesOffered(ServiceType servicetype) {
+    public boolean addServicesOffered(String servicetype) {
         if(!servicesOffered.contains(servicetype)){
             servicesOffered.add(servicetype);
         }
@@ -106,6 +107,13 @@ public class ServiceProvider extends User {
         return reviewsOnUser.remove(review);
     }
 
+    public String getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(String photo) {
+        this.photo = photo;
+    }
     /* methods*/
     public void createService(ServiceType serviceType, Location service, Schedule schedule){}
     public void enterAvailability(Schedule spSchedule){} //spSchedule
@@ -122,4 +130,7 @@ public class ServiceProvider extends User {
     public void makeCommentOnUser(){}
     public void specifyPreferenceToUser(){}
 
+    public List<String> getServicesOffered() {
+        return servicesOffered;
+    }
 }

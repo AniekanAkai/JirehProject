@@ -8,6 +8,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -25,6 +26,7 @@ import java.util.regex.Pattern;
  */
 public class Utility {
 
+    public static final String TAG = "Jireh";
     private static Pattern pattern;
     private static Matcher matcher;
     protected static int TIMEOUT = 60;
@@ -91,13 +93,19 @@ public class Utility {
 
         } else if (id == R.id.nav_signout) {
             Utility.signOut(activity);
-        }else if(id == R.id.nav_become_a_service_provider){
+        } else if(id == R.id.nav_become_a_service_provider) {
+            //Navigate to BecomeAServiceProviderActivity
+            Intent intent = new Intent(activity, BecomeAServiceProviderActivity.class);
+            SignedInUser.getInstance().setUser(signedInUser);
+            activity.startActivity(intent);
+        }  else if (id == R.id.nav_serviceproviderrequests) {
+
+        }  else if (id == R.id.nav_schedule) {
 
         }
 
         DrawerLayout drawer = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
-
     }
 
     public static JSONObject constructUserJSON(User u)
@@ -113,6 +121,7 @@ public class Utility {
             obj.put("dob", u.getDateOfBirth().getTime());
             obj.put("currentLocation", u.getCurrentLocation().toString());
             obj.put("averageRating", u.getCurrentAverageRating());
+            obj.put("isAdmin", u.isAdmin());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -123,13 +132,13 @@ public class Utility {
     {
         JSONObject obj = null;
         try {
-
             obj = constructUserJSON(sp);
             obj.put("availabilityRadius",sp.getAvailabilityRadius());
             obj.put("bankInfo",sp.getBankInfo());
-            obj.put("numberOfCancellation", sp.getNumberOfCancellations());
-            obj.put("verificationId", sp.getVerificationId());
-
+            obj.put("servicesOffered", new JSONArray(sp.getServicesOffered()));
+            obj.put("businessAddress", sp.getLocation());
+//            obj.put("numberOfCancellation", sp.getNumberOfCancellations());
+//            obj.put("verificationId", sp.getVerificationId());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -233,8 +242,9 @@ public class Utility {
 
     public static void signOut(Context context)
     {
-        Intent signInIntent = new Intent(context, LoginActivity.class);//this, UserProfileActivity.class);
+        Intent signOutIntent = new Intent(context, LoginActivity.class);
         SignedInUser.setUser(null);
-        context.startActivity(signInIntent);
+        signOutIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(signOutIntent);
     }
 }

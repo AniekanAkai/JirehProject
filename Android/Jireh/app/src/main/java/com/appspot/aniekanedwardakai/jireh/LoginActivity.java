@@ -126,7 +126,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 // Put Http parameter username with value of Email Edit View control
                 params.put("email", email);
                 // Put Http parameter password with value of Password Edit View control
-                params.put("password", password);
+                params.put("pw", password);
                 // Invoke RESTful Web Service with Http parameters
                 Log.d("Jireh", params.toString());
 

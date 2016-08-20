@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.appspot.aniekanedwardakai.jireh.BecomeAServiceProviderActivity"
+    tools:showIn="@layout/app_bar_become_aservice_provider">
+
+    <Button android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:id="@+id/becomeServiceProviderButton"
+        android:text="OK">
+
+    </Button>
+
+    <EditText android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:id="@+id/servicesToProide"
+        android:hint="List Services you will provide(comma separated)">
+
+    </EditText>
+    <EditText android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:id="@+id/transitNo"
+        android:hint="Transit #">
+    </EditText>
+    <EditText android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:id="@+id/institutionNo"
+        android:hint="Institution #">
+    </EditText>
+    <EditText android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:id="@+id/accountNo"
+        android:hint="Account #">
+    </EditText>
+    <EditText android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:id="@+id/profilePhotoLink"
+        android:hint="Profile Pic location">
+    </EditText>
+    <EditText android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:id="@+id/radius"
+        android:hint="Radius in KM">
+    </EditText>
+    <EditText android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:id="@+id/address"
+        android:hint="Address of business">
+    </EditText>
+</LinearLayout>
