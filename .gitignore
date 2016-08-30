@@ -1,0 +1,5 @@
+*.lock
+*.bin
+Android/Jireh/.idea/workspace.xml
+Android/Jireh/.idea/gradle.xml
+Android/Jireh/build/generated/mockable-android-23.jar
