@@ -99,7 +99,7 @@ public class BecomeAServiceProviderActivity extends AppCompatActivity
                         signedInUser.getFullname(), signedInUser.getDateOfBirth(),
                         signedInUser.getPhoneNumber(), signedInUser.getEmail(),
                         signedInUser.getPassword(), address,
-                        availabilityRadius, "", bankInfo.toString(),
+                        availabilityRadius, 0, bankInfo.toString(),
                         Arrays.asList(servicesToProvide.split(",")));
                 sp.setPhoto(profilePhoto);
 

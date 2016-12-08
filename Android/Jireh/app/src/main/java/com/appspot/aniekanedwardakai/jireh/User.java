@@ -30,6 +30,7 @@ public class User{
     private double averageRating; // calculated from coalition of all reviews on user.
     private ArrayList<Service> servicesRequested;
     private ArrayList<Review> reviewsOn;
+    private double currentRating;
 
 
     public User() {
@@ -134,15 +135,15 @@ public class User{
         Review selectedReview = new Review();
         double sumOfRatings = 0.0;
         int numberOfReviews = reviewsOn.size();
-        if(numberOfReviews==0){
+        if (numberOfReviews == 0) {
             averageRating = 0.0;
-        }else{
+        } else {
             ListIterator<Review> it = reviewsOn.listIterator();
-            while(it.hasNext()){
+            while (it.hasNext()) {
                 selectedReview = it.next();
                 sumOfRatings += selectedReview.getRating();
             }
-            averageRating = sumOfRatings/numberOfReviews;
+            averageRating = sumOfRatings / numberOfReviews;
         }
         return averageRating;
     }
@@ -172,7 +173,7 @@ public class User{
 
 
     //Methods
-    public void requestService(ServiceProvider sp, ServiceType type, GregorianCalendar scheduledTime,
+    public void requestService(ServiceProvider sp, String type, Long scheduledTime,
                                   double ratePerHour, boolean userProvideTool){
 
         Service serviceRequest = new Service(this,sp,type,scheduledTime,ratePerHour,userProvideTool);
@@ -181,5 +182,9 @@ public class User{
 
         //Send email/push notification to the service provider
 
+    }
+
+    public void setCurrentRating(double currentRating) {
+        this.currentRating = currentRating;
     }
 }

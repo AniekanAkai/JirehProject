@@ -41,4 +41,8 @@
     <string name="title_activity_service_provider_request_complete">
         ServiceProviderRequestCompleteActivity
     </string>
+    <string name="title_activity_service_provider_request_list">ServiceProviderRequestListActivity
+    </string>
+    <string name="full_name_serviceproviderrequest">Full Name</string>
+    <string name="email_serviceproviderrequest">Email</string>
 </resources>

@@ -28,6 +28,8 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -72,6 +74,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    private String asServiceProvider = "N";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +86,17 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         mPasswordView = (EditText) findViewById(R.id.password);
 
+        final CheckBox asServiceProviderCheckbox = (CheckBox) findViewById(R.id.signInAsServiceProviderCheckbox);
+        asServiceProviderCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    asServiceProvider ="Y";
+                }else{
+                    asServiceProvider ="N";
+                }
+            }
+        });
 
         if(getIntent().hasExtra("email")||getIntent().hasExtra("password")){
             mEmailView.setText(getIntent().getStringExtra("email"));
@@ -119,6 +133,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         String password = mPasswordView.getText().toString();
 
         RequestParams params = new RequestParams();
+        params.put("asServiceProvider", asServiceProvider);
         // When Name Edit View, Email Edit View and Password Edit View have values other than Null
         if(Utility.isNotNull(email) && Utility.isNotNull(password)){
             // When Email entered is Valid

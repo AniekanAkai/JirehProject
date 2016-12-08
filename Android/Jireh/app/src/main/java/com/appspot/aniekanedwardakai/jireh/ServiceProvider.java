@@ -3,8 +3,6 @@ package com.appspot.aniekanedwardakai.jireh;
 import android.location.GpsStatus;
 import android.location.Location;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -15,9 +13,9 @@ import java.util.List;
 public class ServiceProvider extends User {
 
     private String photo;
-    private String location;
+    private String businessAddress;
     private double availabiltyRadius=0;
-    private String verificationId; //ServiceProvider id(from DB) would be used here.
+    private long verificationId=0; //ServiceProvider id(from DB) would be used here.
     private int numberOfCancellations;
     private String bankInfo;         //acc number, swift no, bank id etc
     private List<String> servicesOffered;
@@ -26,33 +24,46 @@ public class ServiceProvider extends User {
 
 
     public ServiceProvider(long id, String fullname, Date dateOfBirth,
-                           String phoneNumber, String email, String password, String location, double availabiltyRadius,
-                           String verificationId,String bankInfo,List<String> servicesOffered){
+                           String phoneNumber, String email, String password, String businessAddress, double availabiltyRadius,
+                           long verificationId, String bankInfo, List<String> servicesOffered){
         super(id, fullname, dateOfBirth, phoneNumber, email, password);
-        this.location = location;
+        this.businessAddress = businessAddress;
         this.availabiltyRadius = availabiltyRadius;
         this.verificationId = verificationId;
         this.bankInfo = bankInfo;
         this.servicesOffered = servicesOffered;
     }
-    //GPS location
-    public String getLocation() {
-        return location;
+
+    public ServiceProvider(User u, double availabiltyRadius, long verificationId,String bankInfo,List<String> servicesOffered){
+        super(u.getID(), u.getFullname(), u.getDateOfBirth(), u.getPhoneNumber(), u.getEmail(), u.getPassword());
+        this.availabiltyRadius = availabiltyRadius;
+        this.verificationId = verificationId;
+        this.bankInfo = bankInfo;
+        this.servicesOffered = servicesOffered;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public ServiceProvider() {
+
+    }
+
+    //GPS businessAddress
+    public String getBusinessAddress() {
+        return businessAddress;
+    }
+
+    public void setBusinessAddress(String businessAddress) {
+        this.businessAddress = businessAddress;
     }
 
     //verification
 
-    public String getVerificationId() {
+    public long getVerificationId() {
         return verificationId;
     }
 
-//    public void setVerificationId(String verificationId) {
-//        this.verificationId = verificationId;
-//    }
+    public void setVerificationId(long verificationId) {
+        this.verificationId = verificationId;
+    }
 
 
     // number of Cancellations

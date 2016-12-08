@@ -5,8 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
+
+import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,7 +17,6 @@ import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
@@ -136,7 +138,8 @@ public class Utility {
             obj.put("availabilityRadius",sp.getAvailabilityRadius());
             obj.put("bankInfo",sp.getBankInfo());
             obj.put("servicesOffered", new JSONArray(sp.getServicesOffered()));
-            obj.put("businessAddress", sp.getLocation());
+            obj.put("businessAddress", sp.getBusinessAddress());
+            obj.put("profilePictureURL", sp.getPhoto());
 //            obj.put("numberOfCancellation", sp.getNumberOfCancellations());
 //            obj.put("verificationId", sp.getVerificationId());
         } catch (JSONException e) {
@@ -155,9 +158,9 @@ public class Utility {
             obj.put("serviceprovider_id", s.getServiceProvider().getID());
             obj.put("ratePerHour", s.getRatePerHour());
             obj.put("status", s.getStatus());
-            obj.put("scheduledTime", s.getScheduledTime().getTime());
-            obj.put("startTime", s.getServiceStartTime().getTime());
-            obj.put("endTime", s.getServiceEndTime().getTime());
+            obj.put("scheduledTime", s.getScheduledTime());
+            obj.put("startTime", s.getServiceStartTime());
+            obj.put("endTime", s.getServiceEndTime());
             obj.put("finalBalance", s.getFinalBalance());
             obj.put("serviceType", s.getServiceType().toString());
             obj.put("userReview", constructUserReviewJSON(s.getUserReview()));
@@ -221,6 +224,85 @@ public class Utility {
         return null;
     }
 
+    /*
+ * Method to generate user from JSON
+ *
+ */
+    public static User generateUserFromJSON(String json) throws JSONException {
+        Log.d("Jireh", "Generating user from "+json);
+        User u = new User();
+        try {
+            JSONObject o = new JSONObject(json);
+            u = new User(o.getLong("id"),
+                    o.getString("fullname"),
+                    new SimpleDateFormat("yyyy-MM-dd").parse(o.getString("dob")),
+                    o.getString("phoneNumber"),
+                    o.getString("email"), o.getString("password"));
+            u.setCurrentLocation(toLatLng(o.getString("currentLocation")));
+            u.setCurrentRating(o.getDouble("averageRating"));
+            u.setAdmin(o.getBoolean("isAdmin"));
+        } catch (JSONException e) {
+            if(u==null){
+                throw e;
+            }else {
+                e.printStackTrace();
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return u;
+    }
+
+    /*
+     * Method to generate service provider from JSON
+     *
+     */
+    public static ServiceProvider generateServiceProviderFromJSON(String json){
+        ServiceProvider sp = new ServiceProvider();
+        try {
+            JSONObject o = new JSONObject(json);
+            sp = new ServiceProvider();
+            sp.setID(o.getLong("id"));
+            sp.setAvailabilityRadius(o.getDouble("availabilityRadius"));
+            sp.setCurrentLocation(toLatLng(o.getString("currentLocation")));
+            sp.setBankInfo(o.getString("bankInfo"));
+            sp.setBusinessAddress(o.getString("businessAddress"));
+            sp.setPhoto(o.getString("profilePictureURL"));
+            JSONArray servicesOffered = o.getJSONArray("servicesOffered");
+
+            for(int i=0; i<servicesOffered.length(); i++){
+                sp.addServicesOffered(servicesOffered.getString(i));
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return sp;
+    }
+
+    /*
+     * Method to generate service from JSON
+     *
+     */
+    public static Service generateServiceFromJSON(String json){
+        Service s = new Service();
+        try {
+            JSONObject o = new JSONObject(json);
+            s = new Service(new User(),
+                    new ServiceProvider(),
+                    o.getString("serviceType"),
+                    o.getLong("scheduledTime"),
+                    o.getDouble("ratePerHour"),
+                    o.getBoolean("userProvidesTool"));
+            s.getUser().setID(o.getLong("userid"));
+            s.getServiceProvider().setID(o.getLong("serviceproviderid"));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return s;
+    }
+
 
     public static String getDisplayDate(Date date){
 
@@ -238,6 +320,17 @@ public class Utility {
             e.printStackTrace();
         }
         return date;
+    }
+
+    public static LatLng toLatLng(String locationString){
+
+        LatLng location = new LatLng(0,0);
+
+        double lon = Double.parseDouble(locationString.split(",")[0]);
+        double lat = Double.parseDouble(locationString.split(",")[1]);
+
+        location = new LatLng(lon,lat);
+        return location;
     }
 
     public static void signOut(Context context)

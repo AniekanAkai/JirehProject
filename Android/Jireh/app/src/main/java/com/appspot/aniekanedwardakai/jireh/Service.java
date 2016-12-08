@@ -4,6 +4,7 @@ import android.location.Location;
 //import com.google.android.gms.location;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.Date;
 import java.util.GregorianCalendar;
 
 /**
@@ -13,12 +14,12 @@ class Service{
     private String id;
     private User user; //User that requests the service.
     private ServiceProvider serviceProvider; //Service provider that would be supporting this.
-    private ServiceType serviceType; //the type of service being created
+    private String serviceType; //the type of service being created
 
 
-    private GregorianCalendar scheduledTime; //Time user and service provider have settled on.
-    private GregorianCalendar serviceStartTime;
-    private GregorianCalendar serviceEndTime;
+    private Long scheduledTime; //Time user and service provider have settled on.
+    private Long serviceStartTime;
+    private Long serviceEndTime;
 
     private Review userReview;
     private Review serviceProviderReview;
@@ -35,8 +36,18 @@ class Service{
 
     private String status = "";//Pending Approval, Approved, Started, In Progress, Complete
 
-    public Service(User user, ServiceProvider serviceProvider, ServiceType serviceType,
-                   GregorianCalendar scheduledTime, double ratePerHour, boolean userProvidesTool) {
+
+    public Service() {
+        this.user = new User();
+        this.serviceProvider = new ServiceProvider();
+        this.serviceType = "";
+        this.scheduledTime = new Date().getTime();
+        this.ratePerHour = 0.0;
+
+        this.userProvidesTool = true;
+    }
+    public Service(User user, ServiceProvider serviceProvider, String serviceType,
+                   Long scheduledTime, double ratePerHour, boolean userProvidesTool) {
         this.user = user;
         this.serviceProvider = serviceProvider;
         this.serviceType = serviceType;
@@ -47,11 +58,11 @@ class Service{
     }
 
     //Getters and Setters
-    public ServiceType getServiceType() {
+    public String getServiceType() {
         return serviceType;
     }
 
-    public void setServiceType(ServiceType serviceType) {
+    public void setServiceType(String serviceType) {
         this.serviceType = serviceType;
     }
 
@@ -79,27 +90,27 @@ class Service{
         this.serviceProvider = serviceProvider;
     }
 
-    public GregorianCalendar getScheduledTime() {
+    public Long getScheduledTime() {
         return scheduledTime;
     }
 
-    public void setScheduledTime(GregorianCalendar scheduledTime) {
+    public void setScheduledTime(Long scheduledTime) {
         this.scheduledTime = scheduledTime;
     }
 
-    public GregorianCalendar getServiceStartTime() {
+    public Long getServiceStartTime() {
         return serviceStartTime;
     }
 
-    public void setServiceStartTime(GregorianCalendar serviceStartTime) {
+    public void setServiceStartTime(Long serviceStartTime) {
         this.serviceStartTime = serviceStartTime;
     }
 
-    public GregorianCalendar getServiceEndTime() {
+    public Long getServiceEndTime() {
         return serviceEndTime;
     }
 
-    public void setServiceEndTime(GregorianCalendar serviceEndTime) {
+    public void setServiceEndTime(Long serviceEndTime) {
         this.serviceEndTime = serviceEndTime;
     }
 

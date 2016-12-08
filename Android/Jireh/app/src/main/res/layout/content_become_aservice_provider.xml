@@ -44,7 +44,7 @@
     <EditText android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:id="@+id/profilePhotoLink"
-        android:hint="Profile Pic location">
+        android:hint="Profile Pic businessAddress">
     </EditText>
     <EditText android:layout_height="wrap_content"
         android:layout_width="match_parent"

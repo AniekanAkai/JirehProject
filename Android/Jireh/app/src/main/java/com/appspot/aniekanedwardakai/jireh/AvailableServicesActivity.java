@@ -136,6 +136,9 @@ public class AvailableServicesActivity extends AppCompatActivity
         if(!SignedInUser.isSignedInAsServiceProvider()){
             schedule.setVisible(false);
             becomeAServiceProvider.setVisible(true);
+        }else{
+            schedule.setVisible(true);
+            becomeAServiceProvider.setVisible(false);
         }
         navigationView.setNavigationItemSelectedListener(this);
 

@@ -4,12 +4,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 
-import android.os.Parcel;
 import android.util.Log;
 
 import android.widget.Toast;
 
-import com.google.android.gms.common.api.BooleanResult;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.common.net.MediaType;
 import com.loopj.android.http.AsyncHttpClient;
@@ -17,16 +15,17 @@ import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 import com.mysql.jdbc.StringUtils;
 
+import org.apache.commons.mail.EmailException;
 import org.apache.http.Header;
 import org.apache.http.entity.StringEntity;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
@@ -36,7 +35,7 @@ import java.util.Set;
  */
 public class TempDB {
 
-    public static ArrayList<User> tempUsers = new ArrayList<User>();
+    public static ArrayList<User> adminUsers = new ArrayList<User>();
     public static ArrayList<ServiceProvider> tempServiceProviders = new ArrayList<ServiceProvider>();
     public static ArrayList<Service> tempServices = new ArrayList<Service>();
     private static int startCount = 0;
@@ -49,8 +48,8 @@ public class TempDB {
         Log.d("Jireh", "Service Provider JSON: "+ json);
         StringEntity se = new StringEntity(json.toString());
         AsyncHttpClient client = new AsyncHttpClient();
-        client.put(context, "http://104.196.60.217:8080/restfulTest/serviceprovider/create", se, MediaType.JSON_UTF_8.toString(),
-//        client.put(context, "http://192.168.0.106:8080/restfulTest/serviceProvider/create", se, MediaType.JSON_UTF_8.toString(),
+        client.put(context, "http://104.196.60.217:8080/restfulTest/serviceProvider/create", se, MediaType.JSON_UTF_8.toString(),
+//        client.put(context, "http://192.168.0.112:8080/restfulTest/serviceProvider/create", se, MediaType.JSON_UTF_8.toString(),
                 new AsyncHttpResponseHandler(){
                     // When the response returned by REST has Http response code '200'
                     @Override
@@ -59,8 +58,9 @@ public class TempDB {
                         try {
                             String response = StringUtils.toAsciiString(responseBody);
                             // JSON Object
-                            wsResponse = new JSONObject(response);
                             Log.d("Jireh", response);
+                            wsResponse = new JSONObject(response);
+
                             // When the JSON response has status boolean value assigned with true
                             if(wsResponse.getBoolean("status")){
                                 // Display successfully registered message using Toast
@@ -205,7 +205,7 @@ public class TempDB {
             }else if(it.next().equals("bankInfo")){
                 serviceProvider.setBankInfo(String.valueOf(updates.get("bankInfo")));
             }else if(it.next().equals("location")){
-                serviceProvider.setLocation(updates.get("location").toString());
+                serviceProvider.setBusinessAddress(updates.get("location").toString());
             }else if(it.next().equals("serviceProvided")){
                 serviceProvider.addServiceProvided((Service) updates.get("serviceProvided"));
             }else if(it.next().equals("reviewsOn")){
@@ -224,48 +224,48 @@ public class TempDB {
         tempServiceProviders.set(index, serviceProvider);
         return (tempServiceProviders.size()==startCount);
     }
-    public static boolean updateService(Service service, HashMap<String, Object> updates){
+//    public static boolean updateService(Service service, HashMap<String, Object> updates){
         //TODO Update to use webservice call
-        int index= 0;
-        Set keys = updates.keySet();
-        Iterator it = keys.iterator();
-        while(it.hasNext()){
-            if(it.next().equals("scheduledStartTime")){
-                service.setScheduledTime((GregorianCalendar) updates.get("scheduledStartTime"));
-            }else if(it.next().equals("startTime")){
-                service.setServiceStartTime((GregorianCalendar) updates.get("startTime"));
-            }else if(it.next().equals("endTime")){
-                service.setServiceEndTime((GregorianCalendar) updates.get("endTime"));
-            }else if(it.next().equals("serviceLocation")){
-                service.setServiceLocation((LatLng) updates.get("location"));
-            }else if(it.next().equals("serviceType")){
-                service.setServiceType((ServiceType) updates.get("serviceRequested"));
-            }else if(it.next().equals("reviewsOnUser")){
-                service.setUserReview((Review) updates.get("reviewsOnUser"));
-            }else if(it.next().equals("reviewsOnServiceProvider")){
-                service.setServiceProviderReview((Review) updates.get("reviewsOnServiceProvider"));
-            }else if(it.next().equals("userProvidesTool")){
-                service.setUserProvidesTool((boolean) updates.get("userProvidesTool"));
-            }else if(it.next().equals("finalBalance")){
-                service.setFinalBalance((double)updates.get("finalBalance"));
-            }else if(it.next().equals("specialRequests")){
-                service.setSpecialRequests(String.valueOf(updates.get("specialRequests")));
-            }else if(it.next().equals("hasServiceStarted")){
-                service.setHasStartedService((boolean) updates.get("hasServiceStarted"));
-            }else if(it.next().equals("hasServiceCompleted")){
-                service.setHasServiceCompleted((boolean) updates.get("hasServiceCompleted"));
-            }
-        }
-
-        for(int i=0; i<tempServices.size();i++){
-            if(tempServices.get(i).getId() == service.getId()){
-                index = i;
-                i=tempServices.size();
-            }
-        }
-        tempServices.set(index, service);
-        return (tempServices.size()==startCount);
-    }
+//        int index= 0;
+//        Set keys = updates.keySet();
+//        Iterator it = keys.iterator();
+//        while(it.hasNext()){
+//            if(it.next().equals("scheduledStartTime")){
+//                service.setScheduledTime((Long) updates.get("scheduledStartTime"));
+//            }else if(it.next().equals("startTime")){
+//                service.setServiceStartTime((GregorianCalendar) updates.get("startTime"));
+//            }else if(it.next().equals("endTime")){
+//                service.setServiceEndTime((GregorianCalendar) updates.get("endTime"));
+//            }else if(it.next().equals("serviceLocation")){
+//                service.setServiceLocation((LatLng) updates.get("location"));
+//            }else if(it.next().equals("serviceType")){
+//                service.setServiceType((ServiceType) updates.get("serviceRequested"));
+//            }else if(it.next().equals("reviewsOnUser")){
+//                service.setUserReview((Review) updates.get("reviewsOnUser"));
+//            }else if(it.next().equals("reviewsOnServiceProvider")){
+//                service.setServiceProviderReview((Review) updates.get("reviewsOnServiceProvider"));
+//            }else if(it.next().equals("userProvidesTool")){
+//                service.setUserProvidesTool((boolean) updates.get("userProvidesTool"));
+//            }else if(it.next().equals("finalBalance")){
+//                service.setFinalBalance((double)updates.get("finalBalance"));
+//            }else if(it.next().equals("specialRequests")){
+//                service.setSpecialRequests(String.valueOf(updates.get("specialRequests")));
+//            }else if(it.next().equals("hasServiceStarted")){
+//                service.setHasStartedService((boolean) updates.get("hasServiceStarted"));
+//            }else if(it.next().equals("hasServiceCompleted")){
+//                service.setHasServiceCompleted((boolean) updates.get("hasServiceCompleted"));
+//            }
+//        }
+//
+//        for(int i=0; i<tempServices.size();i++){
+//            if(tempServices.get(i).getId() == service.getId()){
+//                index = i;
+//                i=tempServices.size();
+//            }
+//        }
+//        tempServices.set(index, service);
+//        return (tempServices.size()==startCount);
+//    }
 
     /**
      * Method that performs RESTful webservice invocations
@@ -279,7 +279,7 @@ public class TempDB {
         AsyncHttpClient client = new AsyncHttpClient();
 
         client.get("http://104.196.60.217:8080/restfulTest/login/dologin", params, new AsyncHttpResponseHandler() {
-//          client.get("http://192.168.0.106:8080/restfulTest/login/dologin", params, new AsyncHttpResponseHandler() {
+//       client.get("http://192.168.0.112:8080/restfulTest/login/dologin", params, new AsyncHttpResponseHandler() {
             // When the response returned by REST has Http response code '200'
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
@@ -293,14 +293,40 @@ public class TempDB {
                     Log.d("Jireh", response);
                     // When the JSON response has status boolean value assigned with true
                     if (wsResponse.getBoolean("status")) {
+                        JSONArray adminsJSON = wsResponse.getJSONArray("admins");
+                        for(int i=0; i<adminsJSON.length(); i++){
+                            User adminUser = Utility.generateUserFromJSON(adminsJSON.getString(i));
+                            adminUsers.add(adminUser);
+                        }
+
                         user = new User();
                         user.setID(wsResponse.getLong("id"));
                         user.setFullname(wsResponse.getString("fullname"));
                         user.setPassword(wsResponse.getString("password"));
                         user.setEmail(wsResponse.getString("email"));
-                        user.setPhoneNumber(wsResponse.getString("phone"));
-                        user.setDateOfBirth(Utility.toDate(wsResponse.getString("dob")));
+                        user.setPhoneNumber(wsResponse.getString("phoneNumber"));
+                        user.setDateOfBirth(new SimpleDateFormat("yyyy-MM-dd").parse(wsResponse.getString("dob")));
                         user.setAdmin(wsResponse.getBoolean("isAdmin"));
+
+                        if(wsResponse.getBoolean("asServiceProvider")) {
+                            SignedInUser.setSignedInAsServiceProvider(true);
+                            ArrayList<String> servicesOffered = new ArrayList<>();
+                            JSONArray jsonArray = wsResponse.getJSONArray("servicesOffered");
+                            for(int i=0; i<jsonArray.length(); i++){
+                                servicesOffered.add(jsonArray.getString(i));
+                            }
+
+                            ServiceProvider sp = new ServiceProvider(user,
+                                    wsResponse.getDouble("availabilityRadius"),
+                                    wsResponse.getLong("verificationId"),
+                                    wsResponse.getString("bankInfo"),
+                                    servicesOffered);
+                            sp.setPhoto(wsResponse.getString("profilePhotoURL"));
+                            sp.setNumberOfCancellations(wsResponse.getInt("numberOfCancellations"));
+                            sp.setBusinessAddress(wsResponse.getString("businessAddress"));
+                        }else{
+                            SignedInUser.setSignedInAsServiceProvider(false);
+                        }
 
                         // Display successfully registered message using Toast
                         Toast.makeText(context, "You are successfully logged in!", Toast.LENGTH_LONG).show();
@@ -311,6 +337,9 @@ public class TempDB {
                         Toast.makeText(context, "Response status = false.\n" + wsResponse.getString("error_msg"), Toast.LENGTH_LONG).show();
                     }
                 } catch (JSONException e) {
+                    Toast.makeText(context, "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
+                    e.printStackTrace();
+                } catch (ParseException e) {
                     Toast.makeText(context, "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
                     e.printStackTrace();
                 }
@@ -345,12 +374,11 @@ public class TempDB {
         // Show Progress Dialog
         //prgDialog.show();
         // Make RESTful webservice call using AsyncHttpClient object
-
+        Log.d("Jireh", "Getting admins first.");
+        TempDB.retrieveAllAdmins(new RequestParams(), context, activity);
         AsyncHttpClient client = new AsyncHttpClient();
         client.get("http://104.196.60.217:8080/restfulTest/register/doregister",params ,new AsyncHttpResponseHandler() {
             // When the response returned by REST has Http response code '200'
-
-
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 // Hide Progress Dialog
@@ -364,9 +392,14 @@ public class TempDB {
                     if(wsResponse.getBoolean("status")){
                         // Display successfully registered message using Toast
                         Toast.makeText(context, "You are successfully registered!", Toast.LENGTH_LONG).show();
+
+                        String msgContent = "The following user has been registered successfully.\nNew User details: " + params.toString();
                         params.remove("dob");
                         params.remove("phone");
                         params.remove("name");
+
+
+                        NotificationUtility.sendToAllAdmins("New user registered successfully.", msgContent);
 
                         TempDB.invokeWSLogin(params, context, activity);
                     }
@@ -377,6 +410,8 @@ public class TempDB {
                     }
                 } catch (JSONException e) {
                     Toast.makeText(context, "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
+                    e.printStackTrace();
+                } catch (EmailException e) {
                     e.printStackTrace();
                 }
             }
@@ -420,6 +455,7 @@ public class TempDB {
                         wsResponse = new JSONObject(response);
 
                         Log.d("Jireh", response);
+
                         // When the JSON response has status boolean value assigned with true
                         if (wsResponse.getBoolean("status")) {
                             System.out.println(wsResponse.toString());
@@ -472,5 +508,69 @@ public class TempDB {
         ArrayList<LatLng> serviceProviders = new ArrayList<LatLng>();
 
         return  serviceProviders;
+    }
+
+    public static boolean retrieveAllAdmins(final RequestParams params, final Context context, final Activity activity){
+        // Show Progress Dialog
+        //prgDialog.show();
+        // Make RESTful webservice call using AsyncHttpClient object
+
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.get("http://104.196.60.217:8080/restfulTest/user/getAllAdmins",params ,new AsyncHttpResponseHandler() {
+//        client.get("http://192.168.0.112:8080/restfulTest/user/getAllAdmins", params ,new AsyncHttpResponseHandler() {
+            // When the response returned by REST has Http response code '200'
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                // Hide Progress Dialog
+                // prgDialog.hide();
+                try {
+                    String response = StringUtils.toAsciiString(responseBody);
+                    // JSON Object
+                    wsResponse = new JSONObject(response);
+                    Log.d("Jireh", response);
+                    // When the JSON response has status boolean value assigned with true
+                    if(wsResponse.getBoolean("status")){
+                        // Display successfully registered message using Toast
+                        Toast.makeText(context, "All admins received!", Toast.LENGTH_LONG).show();
+                        JSONArray adminsJSON = wsResponse.getJSONArray("admins");
+                        for(int i=0; i<adminsJSON.length(); i++){
+                            User adminUser = Utility.generateUserFromJSON(adminsJSON.getString(i));
+                            adminUsers.add(adminUser);
+                        }
+                    }
+                    // Else display error message
+                    else{
+                        Toast.makeText(context, "Response status = false.\n"+wsResponse.getString("error_msg"), Toast.LENGTH_LONG).show();
+                        success = new ModifiableBooleanValue(false);
+                    }
+                } catch (JSONException e) {
+                    Toast.makeText(context, "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
+                    e.printStackTrace();
+                }
+            }
+            // When the response returned by REST has Http response code other than '200'
+            @Override
+            //public void onFailure(int statusCode, Header[] headers, byte[] response, Throwable error) {
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                // Hide Progress Dialog
+                // prgDialog.hide();
+                // When Http response code is '404'
+//                String response = StringUtils.toAsciiString(responseBody);
+                if(statusCode == 404){
+                    Toast.makeText(context, "Requested resource not found", Toast.LENGTH_LONG).show();
+                }
+                // When Http response code is '500'
+                else if(statusCode == 500){
+                    Toast.makeText(context, "Something went wrong at server end", Toast.LENGTH_LONG).show();
+                }
+                // When Http response code other than 404, 500
+                else{
+                    Toast.makeText(context, "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet or remote server is not up and running]", Toast.LENGTH_LONG).show();
+                }
+                success = new ModifiableBooleanValue(false);
+            }
+        });
+
+        return success.getValue();
     }
 }
