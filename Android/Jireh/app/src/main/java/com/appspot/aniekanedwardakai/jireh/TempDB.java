@@ -36,7 +36,7 @@ import java.util.Set;
 public class TempDB {
 
     public static ArrayList<User> adminUsers = new ArrayList<User>();
-    public static ArrayList<ServiceProvider> tempServiceProviders = new ArrayList<ServiceProvider>();
+    public static ArrayList<ServiceProvider> serviceProvidersNearby = new ArrayList<ServiceProvider>();
     public static ArrayList<Service> tempServices = new ArrayList<Service>();
     private static int startCount = 0;
     private static User user = null;
@@ -65,10 +65,14 @@ public class TempDB {
                             if(wsResponse.getBoolean("status")){
                                 // Display successfully registered message using Toast
                                 Toast.makeText(context, "Service Provider request is successfully created!", Toast.LENGTH_LONG).show();
+
                                 success = new ModifiableBooleanValue(true);
                                 Intent completed = new Intent(context, ServiceProviderRequestCompleteActivity.class);
                                 completed.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 context.startActivity(completed);
+
+
+
                             }
                             // Else display error message
                             else{
@@ -175,10 +179,10 @@ public class TempDB {
 
     public static boolean removeServiceProvider(ServiceProvider newServiceProvider){
         //TODO Update to use webservice call
-        startCount = tempServiceProviders.size();
+        startCount = serviceProvidersNearby.size();
         if (startCount==0){
-            tempServiceProviders.remove(newServiceProvider);
-            return (tempServiceProviders.size() == (startCount-1));
+            serviceProvidersNearby.remove(newServiceProvider);
+            return (serviceProvidersNearby.size() == (startCount-1));
         }
         return false;
     }
@@ -194,35 +198,36 @@ public class TempDB {
 
     public static boolean updateServiceProvider(ServiceProvider serviceProvider, HashMap<String, Object> updates){
         //TODO Update to use webservice call
-        int index= 0;
-        Set keys = updates.keySet();
-        Iterator it = keys.iterator();
-        while(it.hasNext()){
-            if(it.next().equals("availabiltyRadius")){
-                serviceProvider.setAvailabilityRadius((Double) updates.get("availabiltyRadius"));
-            }else if(it.next().equals("numberOfCancellations")){
-                serviceProvider.setNumberOfCancellations((Integer) updates.get("numberOfCancellations"));
-            }else if(it.next().equals("bankInfo")){
-                serviceProvider.setBankInfo(String.valueOf(updates.get("bankInfo")));
-            }else if(it.next().equals("location")){
-                serviceProvider.setBusinessAddress(updates.get("location").toString());
-            }else if(it.next().equals("serviceProvided")){
-                serviceProvider.addServiceProvided((Service) updates.get("serviceProvided"));
-            }else if(it.next().equals("reviewsOn")){
-                serviceProvider.addServiceProviderReview((Review) updates.get("reviewsOn"));
-            }else if(it.next().equals("serviceTypeOffering")){
-                serviceProvider.addServicesOffered(updates.get("serviceTypeOffering").toString());
-            }
-        }
-
-        for(int i=0; i<tempServiceProviders.size();i++){
-            if(tempServiceProviders.get(i).getVerificationId() == serviceProvider.getVerificationId()){
-                index = i;
-                i=tempServiceProviders.size();
-            }
-        }
-        tempServiceProviders.set(index, serviceProvider);
-        return (tempServiceProviders.size()==startCount);
+        return false;
+//        int index= 0;
+//        Set keys = updates.keySet();
+//        Iterator it = keys.iterator();
+//        while(it.hasNext()){
+//            if(it.next().equals("availabiltyRadius")){
+//                serviceProvider.setAvailabilityRadius((Double) updates.get("availabiltyRadius"));
+//            }else if(it.next().equals("numberOfCancellations")){
+//                serviceProvider.setNumberOfCancellations((Integer) updates.get("numberOfCancellations"));
+//            }else if(it.next().equals("bankInfo")){
+//                serviceProvider.setBankInfo(String.valueOf(updates.get("bankInfo")));
+//            }else if(it.next().equals("location")){
+//                serviceProvider.setBusinessAddress(updates.get("location").toString());
+//            }else if(it.next().equals("serviceProvided")){
+//                serviceProvider.addServiceProvided((Service) updates.get("serviceProvided"));
+//            }else if(it.next().equals("reviewsOn")){
+//                serviceProvider.addServiceProviderReview((Review) updates.get("reviewsOn"));
+//            }else if(it.next().equals("serviceTypeOffering")){
+//                serviceProvider.addServicesOffered(updates.get("serviceTypeOffering").toString());
+//            }
+//        }
+//
+//        for(int i=0; i<tempServiceProviders.size();i++){
+//            if(tempServiceProviders.get(i).getVerificationId() == serviceProvider.getVerificationId()){
+//                index = i;
+//                i=tempServiceProviders.size();
+//            }
+//        }
+//        tempServiceProviders.set(index, serviceProvider);
+//        return (tempServiceProviders.size()==startCount);
     }
 //    public static boolean updateService(Service service, HashMap<String, Object> updates){
         //TODO Update to use webservice call
@@ -441,58 +446,125 @@ public class TempDB {
         return success.getValue();
     }
 
+
+    protected static void invokeWSGetAllServiceProviders(final Context context){
+
+        AsyncHttpClient client = new AsyncHttpClient();
+
+        RequestParams params = new RequestParams();
+        params.put("user_id", SignedInUser.getUser().getID());
+        params.put("currentLocation", SignedInUser.getUser().getCurrentLocationString());
+
+      client.get("http://104.196.60.217:8080/restfulTest/serviceProvider/getServiceProviders", params, new AsyncHttpResponseHandler() {
+//        client.get("http://192.168.0.112:8080/restfulTest/serviceProvider/getServiceProviders", params, new AsyncHttpResponseHandler() {
+            // When the response returned by REST has Http response code '200'
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                // Hide Progress Dialog
+                // prgDialog.hide();
+                try {
+                    String response = StringUtils.toAsciiString(responseBody);
+                    // JSON Object
+                    wsResponse = new JSONObject(response);
+
+                    Log.d("Jireh", response);
+                    // When the JSON response has status boolean value assigned with true
+                    if (wsResponse.getBoolean("status")) {
+                        serviceProvidersNearby.clear();
+                        JSONArray serviceProvidersListJSON = wsResponse.getJSONArray("serviceProvidersList");
+                        for(int i=0; i<serviceProvidersListJSON.length(); i++){
+
+                            ServiceProvider serviceProviderNearby = Utility.generateServiceProviderFromJSON(serviceProvidersListJSON.getString(i));
+                            serviceProviderNearby.setFullname(new JSONObject(serviceProvidersListJSON.getString(i)).getString("fullname"));
+                            serviceProvidersNearby.add(serviceProviderNearby);
+                        }
+                        // Display successfully registered message using Toast
+                        Toast.makeText(context, "All Service Providers available to the user gotten.", Toast.LENGTH_LONG).show();
+                    }
+                    // Else display error message
+                    else {
+                        Toast.makeText(context, "Response status = false.\n" + wsResponse.getString("error_msg"), Toast.LENGTH_LONG).show();
+                    }
+                } catch (JSONException e) {
+                    Toast.makeText(context, "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
+                    e.printStackTrace();
+                }
+            }
+
+            // When the response returned by REST has Http response code other than '200'
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] response, Throwable error) {
+                // Hide Progress Dialog
+                // prgDialog.hide();
+                // When Http response code is '404'
+                if (statusCode == 404) {
+                    Toast.makeText(context, "Requested resource not found", Toast.LENGTH_LONG).show();
+                }
+                // When Http response code is '500'
+                else if (statusCode == 500) {
+                    Toast.makeText(context, "Something went wrong at server end", Toast.LENGTH_LONG).show();
+                }
+                // When Http response code other than 404, 500
+                else {
+                    Toast.makeText(context, "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet or remote server is not up and running]", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+    }
+
     protected static User invokeWSUpdateUser(String jsonParams, final Context context, final Activity activity) throws UnsupportedEncodingException {
         Log.d("Jireh", "User JSON: "+ jsonParams);
         StringEntity se = new StringEntity(jsonParams); //"application/json");
         AsyncHttpClient client = new AsyncHttpClient();
         client.put(context, "http://104.196.60.217:8080/restfulTest/user/update", se, MediaType.JSON_UTF_8.toString(),
-            new AsyncHttpResponseHandler(){
-//              When the response returned by REST has Http response code '200'
-                @Override
-                public void onSuccess(String response) {
-                    try {
-                        // JSON Object
-                        wsResponse = new JSONObject(response);
+                new AsyncHttpResponseHandler(){
+                    //              When the response returned by REST has Http response code '200'
+                    @Override
+                    public void onSuccess(String response) {
+                        try {
+                            // JSON Object
+                            wsResponse = new JSONObject(response);
 
-                        Log.d("Jireh", response);
+                            Log.d("Jireh", response);
 
-                        // When the JSON response has status boolean value assigned with true
-                        if (wsResponse.getBoolean("status")) {
-                            System.out.println(wsResponse.toString());
-                            // Display successfully registered message using Toast
-                            Toast.makeText(context, "Signed in user successfully updated.", Toast.LENGTH_LONG).show();
+                            // When the JSON response has status boolean value assigned with true
+                            if (wsResponse.getBoolean("status")) {
+                                System.out.println(wsResponse.toString());
+                                // Display successfully registered message using Toast
+                                Toast.makeText(context, "Signed in user successfully updated.", Toast.LENGTH_LONG).show();
+                            }
+                            // Else display error message
+                            else {
+                                Toast.makeText(context, "Response status = false.\n" + wsResponse.getString("error_msg"), Toast.LENGTH_LONG).show();
+                            }
+                        } catch (JSONException e) {
+                            Toast.makeText(context, "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
+                            e.printStackTrace();
                         }
-                        // Else display error message
+                    }
+
+                    // When the response returned by REST has Http response code other than '200'
+                    @Override
+                    public void onFailure(int statusCode, Throwable error, String content) {
+                        // Hide Progress Dialog
+                        // prgDialog.hide();
+                        // When Http response code is '404'
+                        if (statusCode == 404) {
+                            Toast.makeText(context, "Requested resource not found", Toast.LENGTH_LONG).show();
+                        }
+                        // When Http response code is '500'
+                        else if (statusCode == 500) {
+                            Toast.makeText(context, "Something went wrong at server end", Toast.LENGTH_LONG).show();
+                        }
+                        // When Http response code other than 404, 500
                         else {
-                            Toast.makeText(context, "Response status = false.\n" + wsResponse.getString("error_msg"), Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet or remote server is not up and running]", Toast.LENGTH_LONG).show();
                         }
-                    } catch (JSONException e) {
-                        Toast.makeText(context, "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
-                        e.printStackTrace();
                     }
-                }
-
-                // When the response returned by REST has Http response code other than '200'
-                @Override
-                public void onFailure(int statusCode, Throwable error, String content) {
-                    // Hide Progress Dialog
-                    // prgDialog.hide();
-                    // When Http response code is '404'
-                    if (statusCode == 404) {
-                        Toast.makeText(context, "Requested resource not found", Toast.LENGTH_LONG).show();
-                    }
-                    // When Http response code is '500'
-                    else if (statusCode == 500) {
-                        Toast.makeText(context, "Something went wrong at server end", Toast.LENGTH_LONG).show();
-                    }
-                    // When Http response code other than 404, 500
-                    else {
-                        Toast.makeText(context, "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet or remote server is not up and running]", Toast.LENGTH_LONG).show();
-                    }
-                }
-            });
+                });
         return user;
     }
+
 
     public static void navigatetoLocateServiceActivity(User u, Context context, Activity activity){
         Intent locateIntent = new Intent(context, AvailableServicesActivity.class);
@@ -503,12 +575,6 @@ public class TempDB {
         activity.startActivity(locateIntent);
     }
 
-    public static ArrayList<LatLng> getAvailableServiceProviders() {
-
-        ArrayList<LatLng> serviceProviders = new ArrayList<LatLng>();
-
-        return  serviceProviders;
-    }
 
     public static boolean retrieveAllAdmins(final RequestParams params, final Context context, final Activity activity){
         // Show Progress Dialog

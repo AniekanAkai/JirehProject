@@ -15,6 +15,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 
+import org.apache.commons.mail.EmailException;
+
 public class ServiceProviderRequestCompleteActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -45,6 +47,13 @@ public class ServiceProviderRequestCompleteActivity extends AppCompatActivity
         MenuItem schedule = menu.findItem(R.id.nav_schedule);
         MenuItem serviceProviderRequests = menu.findItem(R.id.nav_serviceproviderrequests);
 
+        Log.d("Jireh", "Sending email to admins after adding new Service provider request.");
+        try {
+            NotificationUtility.sendToAllAdmins("New Service Provider Request",
+                    "The following user just made a request to be a service provider.\n"+signedInUser.toString());
+        } catch (EmailException e) {
+            e.printStackTrace();
+        }
 
         //Set menu items to hide when signed in as admin.
         if(!signedInUser.isAdmin()){

@@ -107,6 +107,7 @@ public class BecomeAServiceProviderActivity extends AppCompatActivity
 
                 try {
                     TempDB.insertServiceProvider(sp, getApplicationContext(), getParent());
+
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }

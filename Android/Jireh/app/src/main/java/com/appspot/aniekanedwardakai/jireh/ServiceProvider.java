@@ -32,6 +32,8 @@ public class ServiceProvider extends User {
         this.verificationId = verificationId;
         this.bankInfo = bankInfo;
         this.servicesOffered = servicesOffered;
+        servicesProvided = new ArrayList<>();
+        reviewsOnUser = new ArrayList<>();
     }
 
     public ServiceProvider(User u, double availabiltyRadius, long verificationId,String bankInfo,List<String> servicesOffered){
@@ -40,10 +42,18 @@ public class ServiceProvider extends User {
         this.verificationId = verificationId;
         this.bankInfo = bankInfo;
         this.servicesOffered = servicesOffered;
+        servicesProvided = new ArrayList<>();
+        reviewsOnUser = new ArrayList<>();
     }
 
     public ServiceProvider() {
-
+        this.businessAddress = "";
+        this.availabiltyRadius = 0;
+        this.verificationId = 0;
+        bankInfo = "";
+        servicesOffered = new ArrayList<>();
+        servicesProvided = new ArrayList<>();
+        reviewsOnUser = new ArrayList<>();
     }
 
     //GPS businessAddress
@@ -96,10 +106,12 @@ public class ServiceProvider extends User {
     }
 
     public boolean addServicesOffered(String servicetype) {
-        if(!servicesOffered.contains(servicetype)){
+        if(!servicesOffered.contains(servicetype)) {
             servicesOffered.add(servicetype);
+            return true;
+        }else{
+            return false;
         }
-        return false;
     }
 
     public boolean addServiceProvided(Service serviceProvided){

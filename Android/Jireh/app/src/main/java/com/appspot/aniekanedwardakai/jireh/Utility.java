@@ -268,10 +268,11 @@ public class Utility {
             sp.setCurrentLocation(toLatLng(o.getString("currentLocation")));
             sp.setBankInfo(o.getString("bankInfo"));
             sp.setBusinessAddress(o.getString("businessAddress"));
-            sp.setPhoto(o.getString("profilePictureURL"));
+            sp.setPhoto(o.getString("profilePhotoURL"));
             JSONArray servicesOffered = o.getJSONArray("servicesOffered");
-
+            Log.d("Jireh","Expected size: "+servicesOffered.length());
             for(int i=0; i<servicesOffered.length(); i++){
+                Log.d("Jireh","Service to be offered: "+servicesOffered.getString(i));
                 sp.addServicesOffered(servicesOffered.getString(i));
             }
 
@@ -325,6 +326,8 @@ public class Utility {
     public static LatLng toLatLng(String locationString){
 
         LatLng location = new LatLng(0,0);
+
+        Log.d(TAG, "Converting the string to LatLng: " + locationString);
 
         double lon = Double.parseDouble(locationString.split(",")[0]);
         double lat = Double.parseDouble(locationString.split(",")[1]);

@@ -152,6 +152,12 @@ public class User{
         return currentLocation;
     }
 
+    public String getCurrentLocationString() {
+        LatLng currentCoordinates = currentLocation;
+        return currentCoordinates.latitude+","+currentCoordinates.longitude;
+    }
+
+
     public void setCurrentLocation(LatLng currentLocation) {
         this.currentLocation = currentLocation;
     }
