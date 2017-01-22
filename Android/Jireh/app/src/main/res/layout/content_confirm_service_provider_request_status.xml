@@ -1,0 +1,104 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/content_confirm_service_provider_request_status"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.appspot.aniekanedwardakai.jireh.ConfirmServiceProviderRequestStatusActivity"
+    tools:showIn="@layout/activity_confirm_service_provider_request_status">
+
+
+    <!--TextView
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:text="Would you like to confirm the service provider request status update?"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        -->
+
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentTop="true"
+        android:contentDescription="TODO"
+        android:src="@mipmap/ic_sampleprofilepicture"
+        android:layout_margin="10dp" />
+
+    <TextView android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:id="@+id/nameOfPendingServiceProvider"
+        android:hint="Name">
+    </TextView>
+
+    <TextView android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:id="@+id/emailOfPendingServiceProvider"
+        android:hint="E-mail">
+    </TextView>
+
+    <TextView android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:id="@+id/servicesToProideOfPendingServiceProvider"
+        android:hint="List Services you will provide(comma separated)">
+    </TextView>
+
+    <TextView android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:id="@+id/transitNoOfPendingServiceProvider"
+        android:hint="Transit #">
+    </TextView>
+
+    <TextView android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:id="@+id/institutionNoOfPendingServiceProvider"
+        android:hint="Institution #">
+    </TextView>
+
+    <TextView android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:id="@+id/accountNoOfPendingServiceProvider"
+        android:hint="Account #">
+    </TextView>
+
+    <TextView android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:id="@+id/profilePhotoLinOfPendingServiceProviderk"
+        android:hint="Profile Pic businessAddress">
+    </TextView>
+
+    <TextView android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:id="@+id/radiusOfPendingServiceProvider"
+        android:hint="Radius in KM">
+    </TextView>
+
+    <TextView android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:id="@+id/addressOfPendingServiceProvider"
+        android:hint="Address of business">
+    </TextView>
+
+    <LinearLayout android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/approveServiceProviderRequestStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Approve"/>
+
+        <Button
+            android:id="@+id/declineServiceProviderRequestStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Decline"/>
+    </LinearLayout>
+</LinearLayout>

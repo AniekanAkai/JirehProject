@@ -17,7 +17,8 @@ public class ServiceProvider extends User {
     private double availabiltyRadius=0;
     private long verificationId=0; //ServiceProvider id(from DB) would be used here.
     private int numberOfCancellations;
-    private String bankInfo;         //acc number, swift no, bank id etc
+//    private String bankInfo;         //acc number, swift no, bank id etc
+    private BankInformation bankInfo;
     private List<String> servicesOffered;
     private ArrayList<Service> servicesProvided; //get from service ClassID
     private ArrayList<Review> reviewsOnUser;      // get from service class userReview
@@ -25,7 +26,7 @@ public class ServiceProvider extends User {
 
     public ServiceProvider(long id, String fullname, Date dateOfBirth,
                            String phoneNumber, String email, String password, String businessAddress, double availabiltyRadius,
-                           long verificationId, String bankInfo, List<String> servicesOffered){
+                           long verificationId, BankInformation bankInfo, List<String> servicesOffered){
         super(id, fullname, dateOfBirth, phoneNumber, email, password);
         this.businessAddress = businessAddress;
         this.availabiltyRadius = availabiltyRadius;
@@ -36,7 +37,7 @@ public class ServiceProvider extends User {
         reviewsOnUser = new ArrayList<>();
     }
 
-    public ServiceProvider(User u, double availabiltyRadius, long verificationId,String bankInfo,List<String> servicesOffered){
+    public ServiceProvider(User u, double availabiltyRadius, long verificationId,BankInformation bankInfo,List<String> servicesOffered){
         super(u.getID(), u.getFullname(), u.getDateOfBirth(), u.getPhoneNumber(), u.getEmail(), u.getPassword());
         this.availabiltyRadius = availabiltyRadius;
         this.verificationId = verificationId;
@@ -50,7 +51,7 @@ public class ServiceProvider extends User {
         this.businessAddress = "";
         this.availabiltyRadius = 0;
         this.verificationId = 0;
-        bankInfo = "";
+        bankInfo = new BankInformation("", "", "");
         servicesOffered = new ArrayList<>();
         servicesProvided = new ArrayList<>();
         reviewsOnUser = new ArrayList<>();
@@ -86,11 +87,11 @@ public class ServiceProvider extends User {
     }
 
     //bankInfo
-    public String getBankInfo() {
+    public BankInformation getBankInfo() {
         return bankInfo;
     }
 
-    public void setBankInfo(String bankInfo) {
+    public void setBankInfo(BankInformation bankInfo) {
         this.bankInfo = bankInfo;
     }
 

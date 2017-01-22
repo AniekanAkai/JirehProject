@@ -1,5 +1,7 @@
 package com.appspot.aniekanedwardakai.jireh;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -12,6 +14,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
+import android.widget.ListView;
 
 public class ServiceProviderRequestListActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -23,6 +27,7 @@ public class ServiceProviderRequestListActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        TempDB.invokeWSGetAllPendingServiceProviders(getApplicationContext());
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -40,6 +45,30 @@ public class ServiceProviderRequestListActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+    }
+
+    @Override
+    public void onStart(){
+        super.onStart();
+        final ListView spListView = (ListView) findViewById(R.id.serviceproviderrequestlistview);
+
+        ServiceProviderAdapter serviceProviderAdapter = new ServiceProviderAdapter(this, TempDB.serviceProviderRequests);
+        spListView.setAdapter(serviceProviderAdapter);
+
+        spListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position,long arg3) {
+                view.setSelected(true);
+                ServiceProvider selectedSP = (ServiceProvider) spListView.getAdapter().getItem(position);
+                Intent intent = new Intent(view.getContext(), ConfirmServiceProviderRequestStatusActivity.class);
+                //DONE add service provider to intent
+                intent.putExtra("selectedServiceProvider", Utility.constructServiceProviderJSON(selectedSP).toString());
+                view.getContext().startActivity(intent);
+            }
+        });
+
     }
 
     @Override

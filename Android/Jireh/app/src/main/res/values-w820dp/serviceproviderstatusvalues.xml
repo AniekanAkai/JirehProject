@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="status_values">
+        <item>@string/serviceproviderstatus_pending</item>
+        <item>@string/serviceproviderstatus_approved</item>
+        <item>@string/serviceproviderstatus_declined</item>
+    </string-array>
+</resources>

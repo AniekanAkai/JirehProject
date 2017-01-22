@@ -42,6 +42,7 @@ public class TempDB {
     private static User user = null;
     protected static ModifiableBooleanValue success = new ModifiableBooleanValue(false);
     protected static JSONObject wsResponse = new JSONObject();
+    public static ArrayList<ServiceProvider> serviceProviderRequests = new ArrayList<ServiceProvider>();
 
     public static boolean insertServiceProvider(ServiceProvider newServiceProvider, final Context context, final Activity activity) throws UnsupportedEncodingException {
         JSONObject json = Utility.constructServiceProviderJSON(newServiceProvider);
@@ -312,6 +313,7 @@ public class TempDB {
                         user.setPhoneNumber(wsResponse.getString("phoneNumber"));
                         user.setDateOfBirth(new SimpleDateFormat("yyyy-MM-dd").parse(wsResponse.getString("dob")));
                         user.setAdmin(wsResponse.getBoolean("isAdmin"));
+                        if(user.isAdmin()) invokeWSGetAllPendingServiceProviders(context);
 
                         if(wsResponse.getBoolean("asServiceProvider")) {
                             SignedInUser.setSignedInAsServiceProvider(true);
@@ -324,7 +326,7 @@ public class TempDB {
                             ServiceProvider sp = new ServiceProvider(user,
                                     wsResponse.getDouble("availabilityRadius"),
                                     wsResponse.getLong("verificationId"),
-                                    wsResponse.getString("bankInfo"),
+                                    new BankInformation(new JSONObject(wsResponse.getString("bankInfo"))),
                                     servicesOffered);
                             sp.setPhoto(wsResponse.getString("profilePhotoURL"));
                             sp.setNumberOfCancellations(wsResponse.getInt("numberOfCancellations"));
@@ -455,8 +457,8 @@ public class TempDB {
         params.put("user_id", SignedInUser.getUser().getID());
         params.put("currentLocation", SignedInUser.getUser().getCurrentLocationString());
 
-      client.get("http://104.196.60.217:8080/restfulTest/serviceProvider/getServiceProviders", params, new AsyncHttpResponseHandler() {
-//        client.get("http://192.168.0.112:8080/restfulTest/serviceProvider/getServiceProviders", params, new AsyncHttpResponseHandler() {
+//        client.get("http://104.196.60.217:8080/restfulTest/serviceProvider/getServiceProviders", params, new AsyncHttpResponseHandler() {
+        client.get("http://192.168.0.112:8080/restfulTest/serviceProvider/getServiceProviders", params, new AsyncHttpResponseHandler() {
             // When the response returned by REST has Http response code '200'
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
@@ -472,10 +474,12 @@ public class TempDB {
                     if (wsResponse.getBoolean("status")) {
                         serviceProvidersNearby.clear();
                         JSONArray serviceProvidersListJSON = wsResponse.getJSONArray("serviceProvidersList");
-                        for(int i=0; i<serviceProvidersListJSON.length(); i++){
+                        Log.d("Jireh", serviceProvidersListJSON.toString());
 
+                        for(int i=0; i<serviceProvidersListJSON.length(); i++){
                             ServiceProvider serviceProviderNearby = Utility.generateServiceProviderFromJSON(serviceProvidersListJSON.getString(i));
                             serviceProviderNearby.setFullname(new JSONObject(serviceProvidersListJSON.getString(i)).getString("fullname"));
+                            Log.d("Jireh", Integer.toString(i)+". "+serviceProviderNearby.getEmail());
                             serviceProvidersNearby.add(serviceProviderNearby);
                         }
                         // Display successfully registered message using Toast
@@ -514,7 +518,7 @@ public class TempDB {
 
     protected static User invokeWSUpdateUser(String jsonParams, final Context context, final Activity activity) throws UnsupportedEncodingException {
         Log.d("Jireh", "User JSON: "+ jsonParams);
-        StringEntity se = new StringEntity(jsonParams); //"application/json");
+        StringEntity se = new StringEntity(jsonParams);
         AsyncHttpClient client = new AsyncHttpClient();
         client.put(context, "http://104.196.60.217:8080/restfulTest/user/update", se, MediaType.JSON_UTF_8.toString(),
                 new AsyncHttpResponseHandler(){
@@ -638,5 +642,122 @@ public class TempDB {
         });
 
         return success.getValue();
+    }
+
+    protected static void invokeWSGetAllPendingServiceProviders(final Context context){
+
+        AsyncHttpClient client = new AsyncHttpClient();
+
+        RequestParams params = new RequestParams();
+
+        client.get("http://104.196.60.217:8080/restfulTest/serviceProvider/getPendingServiceProviderRequests", params, new AsyncHttpResponseHandler() {
+//        client.get("http://192.168.0.112:8080/restfulTest/serviceProvider/getPendingServiceProviderRequests", params, new AsyncHttpResponseHandler() {
+            // When the response returned by REST has Http response code '200'
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                // Hide Progress Dialog
+                // prgDialog.hide();
+                try {
+                    String response = StringUtils.toAsciiString(responseBody);
+                    // JSON Object
+                    wsResponse = new JSONObject(response);
+
+                    Log.d("Jireh", response);
+                    // When the JSON response has status boolean value assigned with true
+                    if (wsResponse.getBoolean("status")) {
+                        serviceProviderRequests.clear();
+                        JSONArray serviceProvidersListJSON = wsResponse.getJSONArray("serviceProvidersList");
+                        for(int i=0; i<serviceProvidersListJSON.length(); i++){
+
+                            ServiceProvider requestingServiceProvider = Utility.generateServiceProviderFromJSON(serviceProvidersListJSON.getString(i));
+//                            requestingServiceProvider.setFullname(new JSONObject(serviceProvidersListJSON.getString(i)).getString("fullname"));
+                            serviceProviderRequests.add(requestingServiceProvider);
+                            Log.d("Jireh", requestingServiceProvider.getFullname()+" added.");
+                        }
+                        // Display successfully registered message using Toast
+                        Toast.makeText(context, "All Service Provider requests returned.", Toast.LENGTH_LONG).show();
+                    }
+                    // Else display error message
+                    else {
+                        Toast.makeText(context, "Response status = false.\n" + wsResponse.getString("error_msg"), Toast.LENGTH_LONG).show();
+                    }
+                } catch (JSONException e) {
+                    Toast.makeText(context, "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
+                    e.printStackTrace();
+                }
+            }
+
+            // When the response returned by REST has Http response code other than '200'
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] response, Throwable error) {
+                // Hide Progress Dialog
+                // prgDialog.hide();
+                // When Http response code is '404'
+                if (statusCode == 404) {
+                    Toast.makeText(context, "Requested resource not found", Toast.LENGTH_LONG).show();
+                }
+                // When Http response code is '500'
+                else if (statusCode == 500) {
+                    Toast.makeText(context, "Something went wrong at server end", Toast.LENGTH_LONG).show();
+                }
+                // When Http response code other than 404, 500
+                else {
+                    Toast.makeText(context, "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet or remote server is not up and running]", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+    }
+
+    public static void invokeWSUpdateServiceProvider(String jsonParams, final Context context) throws UnsupportedEncodingException {
+        Log.d("Jireh", "ServiceProvider JSON: "+ jsonParams);
+        StringEntity se = new StringEntity(jsonParams);
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.put(context, "http://104.196.60.217:8080/restfulTest/serviceProvider/update", se, MediaType.JSON_UTF_8.toString(),
+//        client.put(context, "http://192.168.0.112:8080/restfulTest/serviceProvider/update", se, MediaType.JSON_UTF_8.toString(),
+                new AsyncHttpResponseHandler(){
+                    //              When the response returned by REST has Http response code '200'
+                    @Override
+                    public void onSuccess(String response) {
+                        try {
+                            // JSON Object
+                            wsResponse = new JSONObject(response);
+
+                            Log.d("Jireh", response);
+
+                            // When the JSON response has status boolean value assigned with true
+                            if (wsResponse.getBoolean("status")) {
+                                System.out.println(wsResponse.toString());
+                                // Display successfully registered message using Toast
+                                Toast.makeText(context, "Service provider information successfully updated.", Toast.LENGTH_LONG).show();
+                            }
+                            // Else display error message
+                            else {
+                                Toast.makeText(context, "Response status = false.\n" + wsResponse.getString("error_msg"), Toast.LENGTH_LONG).show();
+                            }
+                        } catch (JSONException e) {
+                            Toast.makeText(context, "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
+                            e.printStackTrace();
+                        }
+                    }
+
+                    // When the response returned by REST has Http response code other than '200'
+                    @Override
+                    public void onFailure(int statusCode, Throwable error, String content) {
+                        // Hide Progress Dialog
+                        // prgDialog.hide();
+                        // When Http response code is '404'
+                        if (statusCode == 404) {
+                            Toast.makeText(context, "Requested resource not found", Toast.LENGTH_LONG).show();
+                        }
+                        // When Http response code is '500'
+                        else if (statusCode == 500) {
+                            Toast.makeText(context, "Something went wrong at server end", Toast.LENGTH_LONG).show();
+                        }
+                        // When Http response code other than 404, 500
+                        else {
+                            Toast.makeText(context, "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet or remote server is not up and running]", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
     }
 }

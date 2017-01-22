@@ -101,6 +101,10 @@ public class Utility {
             SignedInUser.getInstance().setUser(signedInUser);
             activity.startActivity(intent);
         }  else if (id == R.id.nav_serviceproviderrequests) {
+            //Navigate to BecomeAServiceProviderActivity
+            Intent intent = new Intent(activity, ServiceProviderRequestListActivity.class);
+            SignedInUser.getInstance().setUser(signedInUser);
+            activity.startActivity(intent);
 
         }  else if (id == R.id.nav_schedule) {
 
@@ -121,7 +125,7 @@ public class Utility {
             obj.put("phoneNumber", u.getPhoneNumber());
             obj.put("email", u.getEmail());
             obj.put("dob", u.getDateOfBirth().getTime());
-            obj.put("currentLocation", u.getCurrentLocation().toString());
+            obj.put("currentLocation", u.getCurrentLocationString());
             obj.put("averageRating", u.getCurrentAverageRating());
             obj.put("isAdmin", u.isAdmin());
         } catch (JSONException e) {
@@ -136,7 +140,7 @@ public class Utility {
         try {
             obj = constructUserJSON(sp);
             obj.put("availabilityRadius",sp.getAvailabilityRadius());
-            obj.put("bankInfo",sp.getBankInfo());
+            obj.put("bankInfo",sp.getBankInfo().toString());
             obj.put("servicesOffered", new JSONArray(sp.getServicesOffered()));
             obj.put("businessAddress", sp.getBusinessAddress());
             obj.put("profilePictureURL", sp.getPhoto());
@@ -266,7 +270,7 @@ public class Utility {
             sp.setID(o.getLong("id"));
             sp.setAvailabilityRadius(o.getDouble("availabilityRadius"));
             sp.setCurrentLocation(toLatLng(o.getString("currentLocation")));
-            sp.setBankInfo(o.getString("bankInfo"));
+            sp.setBankInfo(new BankInformation(new JSONObject(o.getString("bankInfo"))));
             sp.setBusinessAddress(o.getString("businessAddress"));
             sp.setPhoto(o.getString("profilePhotoURL"));
             JSONArray servicesOffered = o.getJSONArray("servicesOffered");
@@ -275,8 +279,20 @@ public class Utility {
                 Log.d("Jireh","Service to be offered: "+servicesOffered.getString(i));
                 sp.addServicesOffered(servicesOffered.getString(i));
             }
-
-        } catch (JSONException e) {
+            sp.setEmail(o.getString("email"));
+            sp.setPassword(o.getString("password"));
+            try {
+                sp.setDateOfBirth(new SimpleDateFormat("yyyy-MM-dd").parse(o.getString("dob")));
+            } catch (ParseException e) {
+                Log.d("Jireh", "Parsing error in generate service provider from JSON.");
+                e.printStackTrace();
+            }
+            sp.setFullname(o.getString("fullname"));//o.put("fullname", sp.getFullname());
+            sp.setPhoneNumber(o.getString("phoneNumber"));//o.put("phoneNumber", sp.getPhoneNumber());
+            sp.setCurrentRating(o.getDouble("rating"));//o.put("rating", sp.getCurrentAverageRating());
+            sp.setAdmin(o.getBoolean("isAdmin"));//o.put("isAdmin", sp.isAdmin());
+            sp.setCurrentLocation(toLatLng(o.getString("currentLocation")));//o.put("currentLocation", sp.getCurrentLocation());
+    } catch (JSONException e) {
             e.printStackTrace();
         }
         return sp;
