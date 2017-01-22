@@ -36,6 +36,7 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.loopj.android.http.RequestParams;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -72,7 +73,7 @@ public class AvailableServicesActivity extends AppCompatActivity
     private JSONObject userjson = new JSONObject();
     private JSONArray updates = new JSONArray();
 
-    private ArrayList<LatLng> availableServiceProviders = new ArrayList<LatLng>();
+//    private ArrayList<LatLng> availableServiceProviders = new ArrayList<LatLng>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,16 +137,18 @@ public class AvailableServicesActivity extends AppCompatActivity
         if(!SignedInUser.isSignedInAsServiceProvider()){
             schedule.setVisible(false);
             becomeAServiceProvider.setVisible(true);
+        }else{
+            schedule.setVisible(true);
+            becomeAServiceProvider.setVisible(false);
         }
         navigationView.setNavigationItemSelectedListener(this);
 
         userFullName_header = (TextView) findViewById(R.id.userFullName_Header);
-//        userFullName_header.setText(signedInUser.getFullname());
         userEmail_header = (TextView) findViewById(R.id.userEmail_Header);
-//        userEmail_header.setText(signedInUser.getEmail());
+
 
         //Get all the services in the user defined radius, that are within the service provider's availability radius.
-        availableServiceProviders = TempDB.getAvailableServiceProviders();
+        TempDB.invokeWSGetAllServiceProviders(getApplicationContext());
     }
 
     @Override
@@ -218,18 +221,38 @@ public class AvailableServicesActivity extends AppCompatActivity
 
         Log.d(TAG, "Map ready, showing current location, " + signedInUser.getCurrentLocation().toString());
         // Add a marker in Sydney and move the camera
-//        LatLng sydney = new LatLng(-34, 151);
-        //mMap.addMarker(new MarkerOptions().position(signedInUser.getCurrentLocation()).title("I'm here."));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(signedInUser.getCurrentLocation()));
+        try {
+            mMap.addMarker(new MarkerOptions().position(signedInUser.getCurrentLocation()).title("You're here."));
+
+            for(int i=0; i<TempDB.serviceProvidersNearby.size(); i++){
+                ServiceProvider sp = TempDB.serviceProvidersNearby.get(i);
+                mMap.addMarker(new MarkerOptions().position(sp.getCurrentLocation()).title(sp.getFullname()+" Services Offered: "+sp.getServicesOffered()));
+            }
+
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(signedInUser.getCurrentLocation()));
+        }catch(Exception e){
+            e.printStackTrace();
+            Log.d(TAG, e.getMessage());
+        }
     }
 
     private void updateUserMarker()
     {
-        Log.d(TAG, "New Location updated to " + signedInUser.getCurrentLocation().toString());
+        Log.d("Jireh", "New Location updated to " + signedInUser.getCurrentLocation().toString());
+        mMap.clear();
+
+        mMap.addMarker(new MarkerOptions().position(signedInUser.getCurrentLocation()).title("You're here."));
+
+        for(int i=0; i<TempDB.serviceProvidersNearby.size(); i++){
+            ServiceProvider sp = TempDB.serviceProvidersNearby.get(i);
+            mMap.addMarker(new MarkerOptions().position(sp.getCurrentLocation()).title(sp.getFullname()+" Services Offered: "+sp.getServicesOffered()));
+        }
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(signedInUser.getCurrentLocation()));
+
         // Add a marker for all the service providers in the available radius
 
-        //mMap.addMarker(new MarkerOptions().position(signedInUser.getCurrentLocation()).title("I'm here."));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(signedInUser.getCurrentLocation()));
+
     }
 
     private boolean checkPermission(String permission) {
@@ -341,12 +364,15 @@ public class AvailableServicesActivity extends AppCompatActivity
         signedInUser.setCurrentLocation(currentCoordinates);
         //Set current location on the database.
         try {
-
             userjson.put("id", signedInUser.getID());
             updates.put(Utility.generateUpdateJson("currentLocation",currentCoordinates.latitude+","+currentCoordinates.longitude));
             userjson.put("updates", updates);
             String updateUserLocationJSON = userjson.toString();
             TempDB.invokeWSUpdateUser(updateUserLocationJSON, getApplicationContext(), this);
+
+            Log.d("Jireh", "Get all available service providers");
+            TempDB.invokeWSGetAllServiceProviders(getApplicationContext());
+
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         } catch (JSONException e) {

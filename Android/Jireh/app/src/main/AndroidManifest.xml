@@ -107,6 +107,23 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.appspot.aniekanedwardakai.jireh.BecomeAServiceProviderActivity" />
         </activity>
+        <activity
+            android:name=".ServiceProviderRequestListActivity"
+            android:label="@string/title_activity_service_provider_request_list"
+            android:parentActivityName=".AvailableServicesActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.appspot.aniekanedwardakai.jireh.AvailableServicesActivity" />
+        </activity>
+        <activity
+            android:name=".ConfirmServiceProviderRequestStatusActivity"
+            android:label="@string/title_activity_confirm_service_provider_request_status"
+            android:parentActivityName=".ServiceProviderRequestListActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.appspot.aniekanedwardakai.jireh.ServiceProviderRequestListActivity" />
+        </activity>
     </application>
-
 </manifest>

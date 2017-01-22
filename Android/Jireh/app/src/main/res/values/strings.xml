@@ -41,4 +41,17 @@
     <string name="title_activity_service_provider_request_complete">
         ServiceProviderRequestCompleteActivity
     </string>
+    <string name="title_activity_service_provider_request_list">ServiceProviderRequestListActivity
+    </string>
+    <string name="full_name_serviceproviderrequest">Full Name</string>
+    <string name="email_serviceproviderrequest">Email</string>
+    <string name="status">Status</string>
+    <string name="servicesToOffer">Services to offer</string>
+    <string name="bankInfo">Bank Information</string>
+    <string name="serviceproviderstatus_approved">Approved</string>
+    <string name="serviceproviderstatus_declined">Declined</string>
+    <string name="serviceproviderstatus_pending">Pending</string>
+    <string name="title_activity_confirm_service_provider_request_status">
+        ConfirmServiceProviderRequestStatusActivity
+    </string>
 </resources>

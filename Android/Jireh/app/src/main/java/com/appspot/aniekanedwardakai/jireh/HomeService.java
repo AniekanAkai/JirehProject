@@ -8,7 +8,7 @@ import java.util.GregorianCalendar;
 public class HomeService extends Service {
     //NOTE: serciveLocation = usersLocation
 
-    public HomeService(User user, ServiceProvider serviceProvider, ServiceType serviceType, GregorianCalendar scheduledTime, double ratePerHour, boolean userProvidesTool) {
+    public HomeService(User user, ServiceProvider serviceProvider, String serviceType, Long scheduledTime, double ratePerHour, boolean userProvidesTool) {
         super(user, serviceProvider, serviceType, scheduledTime, ratePerHour, userProvidesTool);
     }
 }

@@ -3,4 +3,12 @@
     <string name="action_delete">Delete Account</string>
     <string name="deleteReasonTextAreaLabel">Why are you deleting your account?</string>
     <string name="action_cancel">Cancel</string>
+    <string name="full_name_serviceproviderrequest">Full Name</string>
+    <string name="email_serviceproviderrequest">Example application</string>
+    <string name="status">Status</string>
+    <string name="servicesToOffer">Services to offer</string>
+    <string name="bankInfo">Bank Information</string>
+    <string name="serviceproviderstatus_approved">Approved</string>
+    <string name="serviceproviderstatus_declined">Declined</string>
+    <string name="serviceproviderstatus_pending">Pending</string>
 </resources>

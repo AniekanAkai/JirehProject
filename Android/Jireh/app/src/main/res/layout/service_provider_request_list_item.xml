@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="20dip">
+
+
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentTop="true"
+        android:contentDescription="TODO"
+        android:src="@mipmap/ic_sampleprofilepicture"
+        android:layout_margin="10dp" />
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/icon"
+        android:layout_centerVertical="true">
+
+        <TextView android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/serviceProviderName"
+            android:hint="@string/full_name_serviceproviderrequest">
+        </TextView>
+        <TextView android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/serviceProvidersEmail"
+            android:hint="@string/email_serviceproviderrequest">
+        </TextView>
+        <TextView android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/servicesRequestedToOffer"
+            android:hint="@string/servicesToOffer">
+        </TextView>
+        <!--Spinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/serviceProviderRequestStatus"
+            android:hint="@string/status"
+            android:spinnerMode="dropdown">
+        <Spinner-->
+    </LinearLayout>
+
+</RelativeLayout>

@@ -86,20 +86,20 @@ public class BecomeAServiceProviderActivity extends AppCompatActivity
                 String profilePhoto = ((EditText)findViewById(R.id.profilePhotoLink)).getText().toString();
                 String address = ((EditText) findViewById(R.id.address)).getText().toString();
 
-                JSONObject bankInfo = new JSONObject();
-                try {
-                    bankInfo.put("accountNumber",accountNo);
-                    bankInfo.put("transitNumber", transitNo);
-                    bankInfo.put("institutionNumber", institutionNo);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+//                JSONObject bankInfo = new JSONObject();
+//                try {
+//                    bankInfo.put("accountNumber",accountNo);
+//                    bankInfo.put("transitNumber", transitNo);
+//                    bankInfo.put("institutionNumber", institutionNo);
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
 
                 ServiceProvider sp = new ServiceProvider(signedInUser.getID(),
                         signedInUser.getFullname(), signedInUser.getDateOfBirth(),
                         signedInUser.getPhoneNumber(), signedInUser.getEmail(),
                         signedInUser.getPassword(), address,
-                        availabilityRadius, "", bankInfo.toString(),
+                        availabilityRadius, 0, new BankInformation(accountNo, transitNo, institutionNo),
                         Arrays.asList(servicesToProvide.split(",")));
                 sp.setPhoto(profilePhoto);
 
@@ -107,6 +107,7 @@ public class BecomeAServiceProviderActivity extends AppCompatActivity
 
                 try {
                     TempDB.insertServiceProvider(sp, getApplicationContext(), getParent());
+
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }

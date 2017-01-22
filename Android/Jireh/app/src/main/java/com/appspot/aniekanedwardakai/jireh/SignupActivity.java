@@ -102,7 +102,9 @@ public class SignupActivity extends AppCompatActivity implements LoaderCallbacks
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_signup2);
 
         // Set up the signup form.
@@ -167,6 +169,23 @@ public class SignupActivity extends AppCompatActivity implements LoaderCallbacks
 
 
     }
+
+    @Override
+    protected void onStart(){
+        Log.d("Jireh", "Starting activity");
+        super.onStart();
+        //Get all the administrators information on startup.
+        TempDB.retrieveAllAdmins(new RequestParams(), getApplicationContext(), this);
+    }
+
+    @Override
+    protected void onResume(){
+        Log.d("Jireh", "Resuming activity");
+        super.onResume();
+        //Get all the administrators information on startup.
+//        TempDB.retrieveAllAdmins(new RequestParams(), getApplicationContext(), this);
+    }
+
     /**
      * Method gets triggered when Sign Up button is clicked
 
@@ -203,6 +222,7 @@ public class SignupActivity extends AppCompatActivity implements LoaderCallbacks
                 params.put("pw", password);
                 params.put("dob", dobValue.getTime().getTime());
                 params.put("phone", mPhoneView.getText().toString());
+                params.put("asServiceProvider", "N");
                 // Invoke RESTful Web Service with Http parameters
                 Log.d("Jireh", params.toString());
 

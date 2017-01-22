@@ -28,6 +28,8 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -72,6 +74,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    private String asServiceProvider = "N";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +86,17 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         mPasswordView = (EditText) findViewById(R.id.password);
 
+        final CheckBox asServiceProviderCheckbox = (CheckBox) findViewById(R.id.signInAsServiceProviderCheckbox);
+        asServiceProviderCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    asServiceProvider ="Y";
+                }else{
+                    asServiceProvider ="N";
+                }
+            }
+        });
 
         if(getIntent().hasExtra("email")||getIntent().hasExtra("password")){
             mEmailView.setText(getIntent().getStringExtra("email"));
@@ -119,6 +133,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         String password = mPasswordView.getText().toString();
 
         RequestParams params = new RequestParams();
+        params.put("asServiceProvider", asServiceProvider);
         // When Name Edit View, Email Edit View and Password Edit View have values other than Null
         if(Utility.isNotNull(email) && Utility.isNotNull(password)){
             // When Email entered is Valid
@@ -143,91 +158,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
     }
 
-
-    /**
-     * Method that performs RESTful webservice invocations
-     *
-     * @param params
-     */
-    public void invokeWS(RequestParams params){
-        // Show Progress Dialog
-        //prgDialog.show();
-        // Make RESTful webservice call using AsyncHttpClient object
-        AsyncHttpClient client = new AsyncHttpClient();
-        client.get("http://192.168.0.106:8080/restfulTest/login/dologin",params ,new AsyncHttpResponseHandler() {
-            // When the response returned by REST has Http response code '200'
-            @Override
-            public void onSuccess(String response) {
-                // Hide Progress Dialog
-                // prgDialog.hide();
-                try {
-                    // JSON Object
-                    JSONObject obj = new JSONObject(response);
-                    Log.d("Jireh", response);
-                    // When the JSON response has status boolean value assigned with true
-                    if(obj.getBoolean("status")){
-                        User user = new User(obj.getLong("id"), obj.getString("fullname"),
-                                Utility.toDate(obj.getString("dob")), obj.getString("phone"), obj.getString("email"),
-                                obj.getString("password"));
-
-                        // Display successfully registered message using Toast
-                        Toast.makeText(getApplicationContext(), "You are successfully logged in!", Toast.LENGTH_LONG).show();
-//                        grantUriPermission();
-                        navigatetoLocateServiceActivity(user);
-                    }
-                    // Else display error message
-                    else{
-                        //errorMsg.setText(obj.getString("error_msg"));
-                        Toast.makeText(getApplicationContext(), "Response status = false.\n"+obj.getString("error_msg"), Toast.LENGTH_LONG).show();
-                    }
-                } catch (JSONException e) {
-                    // TODO Auto-generated catch block
-                    Toast.makeText(getApplicationContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
-                    e.printStackTrace();
-                }
-
-            }
-            // When the response returned by REST has Http response code other than '200'
-            @Override
-            //public void onFailure(int statusCode, Header[] headers, byte[] response, Throwable error) {
-            public void onFailure(int statusCode, Throwable error, String content) {
-                // Hide Progress Dialog
-                // prgDialog.hide();
-                // When Http response code is '404'
-                if(statusCode == 404){
-                    Toast.makeText(getApplicationContext(), "Requested resource not found", Toast.LENGTH_LONG).show();
-                }
-                // When Http response code is '500'
-                else if(statusCode == 500){
-                    Toast.makeText(getApplicationContext(), "Something went wrong at server end", Toast.LENGTH_LONG).show();
-                }
-                // When Http response code other than 404, 500
-                else{
-                    Toast.makeText(getApplicationContext(), "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet or remote server is not up and running]", Toast.LENGTH_LONG).show();
-                }
-            }
-
-            /**
-             * Method which navigates from Register Activity to Login Activity
-             */
-            public void navigatetoLocateServiceActivity(User u){
-                Intent locateIntent = new Intent(getApplicationContext(),LocateServiceActivity.class);
-
-//                locateIntent.putExtra("signedInUser",u);
-                // Clears History of Activity
-                locateIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(locateIntent);
-            }
-
-            /**
-             * Set degault values for Edit View controls
-             */
-            public void setDefaultValues(){
-                mEmailView.setText("");
-                mPasswordView.setText("");
-            }
-        });
-    }
 
     private void populateAutoComplete() {
         if (!mayRequestContacts()) {
