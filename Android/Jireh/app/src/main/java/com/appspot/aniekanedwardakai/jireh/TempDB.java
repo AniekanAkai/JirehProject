@@ -457,8 +457,8 @@ public class TempDB {
         params.put("user_id", SignedInUser.getUser().getID());
         params.put("currentLocation", SignedInUser.getUser().getCurrentLocationString());
 
-//        client.get("http://104.196.60.217:8080/restfulTest/serviceProvider/getServiceProviders", params, new AsyncHttpResponseHandler() {
-        client.get("http://192.168.0.112:8080/restfulTest/serviceProvider/getServiceProviders", params, new AsyncHttpResponseHandler() {
+        client.get("http://104.196.60.217:8080/restfulTest/serviceProvider/getServiceProviders", params, new AsyncHttpResponseHandler() {
+//        client.get("http://192.168.0.112:8080/restfulTest/serviceProvider/getServiceProviders", params, new AsyncHttpResponseHandler() {
             // When the response returned by REST has Http response code '200'
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
